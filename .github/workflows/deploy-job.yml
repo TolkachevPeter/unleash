@@ -17,7 +17,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: leitop2k/unleash_4.15.4:latest
+          tags: petertolkachev/unleash_4.15.4:latest  
   deploy:
     runs-on: self-hosted
     needs: build-push
