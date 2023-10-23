@@ -13,25 +13,31 @@ jobs:
   build-push:
     runs-on: self-hosted
     steps:
+      - uses: actions/checkout@v2
+      
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: petertolkachev/unleash_4.15.4:latest  
+          tags: petertolkachev/unleash_4.15.4:latest
+
   deploy:
     runs-on: self-hosted
     needs: build-push
     steps:
       - uses: actions/checkout@v2
+      
       - name: docker-compose down
-        run: |
-          docker-compose down
+        run: docker-compose down
+        
       - name: docker system prune -af
-        run: |
-          docker system prune -af
+        run: docker system prune -af
+        
       - name: docker-compose up -d
-        run: |
-          docker-compose up -d
+        run: docker-compose up -d
+        
       - name: docker ps
-        run: |
-          docker ps
+        run: docker ps
