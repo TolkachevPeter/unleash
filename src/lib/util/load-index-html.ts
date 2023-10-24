@@ -2,7 +2,11 @@ import fs from 'fs';
 import { IUnleashConfig } from '../server-impl';
 import { rewriteHTML } from './rewriteHTML';
 import path from 'path';
-import fetch from 'make-fetch-happen';
+import createDOMPurify from 'dompurify';
+import { JSDOM } from 'jsdom';
+
+const window = new JSDOM('').window;
+const DOMPurify = createDOMPurify(window);
 
 export async function loadIndexHTML(
     config: IUnleashConfig,
@@ -10,15 +14,47 @@ export async function loadIndexHTML(
 ): Promise<string> {
     const { cdnPrefix, baseUriPath = '' } = config.server;
 
-    let indexHTML: string;
-    if (cdnPrefix) {
-        const res = await fetch(`${cdnPrefix}/index.html`);
-        indexHTML = await res.text();
-    } else {
-        indexHTML = fs
-            .readFileSync(path.join(publicFolder, 'index.html'))
-            .toString();
-    }
+    const cleanConfig = {
+        KEEP_CONTENT: true,
+        ALLOWED_TAGS: [
+            '!DOCTYPE',
+            'html',
+            'head',
+            'title',
+            'meta',
+            'link',
+            'body',
+            'div',
+            'script',
+            'style',
+        ],
+        ALLOWED_ATTR: [
+            'charset',
+            'lang',
+            'rel',
+            'href',
+            'http-equiv',
+            'name',
+            'content',
+            'type',
+            'crossorigin',
+            'src',
+            'id',
+            'edge',
+            'initial-scale',
+            'family',
+            'wght',
+            'display',
+            'viewport',
+            'description',
+        ],
+        FORCE_BODY: true,
+    };
 
-    return rewriteHTML(indexHTML, baseUriPath, cdnPrefix);
+    const cleanHTML = DOMPurify.sanitize(
+        fs.readFileSync(path.join(publicFolder, 'index.html')).toString(),
+        cleanConfig,
+    ).toString();
+
+    return rewriteHTML(cleanHTML, baseUriPath, cdnPrefix);
 }

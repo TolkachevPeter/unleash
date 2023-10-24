@@ -175,7 +175,7 @@ const defaultServerOption: IServerOption = {
         process.env.GRACEFUL_SHUTDOWN_TIMEOUT,
         secondsToMilliseconds(1),
     ),
-    secret: process.env.UNLEASH_SECRET,
+    secret: process.env.UNLEASH_SIMPLE_STRING,
 };
 
 const defaultVersionOption: IVersionOption = {

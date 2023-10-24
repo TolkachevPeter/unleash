@@ -19,8 +19,8 @@ services:
       # initialize Unleash with multiple tokens, separate them with a
       # comma (`token1,token2`).
       INIT_CLIENT_API_TOKENS: "default:development.unleash-insecure-api-token"
-      # не забыть переписать ключик!
-      UNLEASH_SECRET: "some-key"
+      # не менять!
+      UNLEASH_SIMPLE_STRING: "c2VjcmV0"
       ENABLE_REQUEST_LOGGER: "true"
     command: [ "node", "index.js" ]
     restart: always
@@ -65,8 +65,8 @@ services:
       POSTGRES_USER: unleash
       POSTGRES_DB: unleash_db
     volumes:
-      - ./data:/var/lib/postgresql/data
-      - ./backups:/backups
+      - /root/unleash/data:/var/lib/postgresql/data
+      - /root/unleash/backups:/backups
   postgres_kk:
     image: postgres:latest
     ports:
@@ -76,8 +76,8 @@ services:
       POSTGRES_USER: keycloack
       POSTGRES_DB: keycloack_db
     volumes:
-      - ./data-postgres_kk:/var/lib/postgresql/data
-      - ./backups:/backups
+      - /root/unleash/data-postgres_kk:/var/lib/postgresql/data
+      - /root/unleash/backups:/backups
 
 volumes:
   pgadmin:

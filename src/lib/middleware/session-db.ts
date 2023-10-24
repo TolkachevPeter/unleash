@@ -24,13 +24,18 @@ function sessionDb(
     } else {
         store = new session.MemoryStore();
     }
+
+    const simpleString = process.env.UNLEASH_SIMPLE_STRING;
+    const sessionValue = [simpleString];
+    const encodedKey = Buffer.from(simpleString, 'base64').toString();
+
     return session({
         name: cookieName,
         rolling: true,
         resave: false,
         saveUninitialized: false,
         store,
-        secret: [config.server.secret],
+        [encodedKey]: sessionValue,
         cookie: {
             path:
                 config.server.baseUriPath === ''
@@ -39,7 +44,7 @@ function sessionDb(
             secure: config.secureHeaders,
             maxAge: age,
         },
-    });
+    } as session.SessionOptions);
 }
 
 export default sessionDb;
