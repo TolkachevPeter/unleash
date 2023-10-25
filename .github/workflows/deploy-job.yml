@@ -38,6 +38,29 @@ jobs:
         
       - name: docker-compose up -d
         run: docker-compose up -d
-        
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_SSL: ${{ secrets.DATABASE_SSL }}
+          LOG_LEVEL: ${{ secrets.LOG_LEVEL }}
+          INIT_FRONTEND_API_TOKENS: ${{ secrets.INIT_FRONTEND_API_TOKENS }}
+          INIT_CLIENT_API_TOKENS: ${{ secrets.INIT_CLIENT_API_TOKENS }}
+          UNLEASH_SIMPLE_STRING: ${{ secrets.UNLEASH_SIMPLE_STRING }}
+          ENABLE_REQUEST_LOGGER: ${{ secrets.ENABLE_REQUEST_LOGGER }}
+          DB_ADDR_KEYCLOAK: ${{ secrets.DB_ADDR_KEYCLOAK }}
+          DB_DATABASE_KEYCLOAK: ${{ secrets.DB_DATABASE_KEYCLOAK }}
+          DB_USER_KEYCLOAK: ${{ secrets.DB_USER_KEYCLOAK }}
+          DB_PASSWORD_KEYCLOAK: ${{ secrets.DB_PASSWORD_KEYCLOAK }}
+          KEYCLOAK_ADMIN: ${{ secrets.KEYCLOAK_ADMIN }}
+          KEYCLOAK_ADMIN_PASSWORD: ${{ secrets.KEYCLOAK_ADMIN_PASSWORD }}
+          KEYCLOAK_FRONTEND_URL: ${{ secrets.KEYCLOAK_FRONTEND_URL }}
+          PGADMIN_DEFAULT_EMAIL: ${{ secrets.PGADMIN_DEFAULT_EMAIL }}
+          PGADMIN_DEFAULT_PASSWORD: ${{ secrets.PGADMIN_DEFAULT_PASSWORD }}
+          POSTGRES_PASSWORD_UNLEASH: ${{ secrets.POSTGRES_PASSWORD_UNLEASH }}
+          POSTGRES_USER_UNLEASH: ${{ secrets.POSTGRES_USER_UNLEASH }}
+          POSTGRES_DB_UNLEASH: ${{ secrets.POSTGRES_DB_UNLEASH }}
+          POSTGRES_PASSWORD_KEYCLOAK: ${{ secrets.POSTGRES_PASSWORD_KEYCLOAK }}
+          POSTGRES_USER_KEYCLOAK: ${{ secrets.POSTGRES_USER_KEYCLOAK }}
+          POSTGRES_DB_KEYCLOAK: ${{ secrets.POSTGRES_DB_KEYCLOAK }}
+
       - name: docker ps
         run: docker ps

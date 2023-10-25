@@ -6,22 +6,13 @@ services:
     ports:
       - "4242:4242"
     environment:
-      # This points Unleash to its backing database (defined in the `db` section below)
-      DATABASE_URL: "postgres://unleash:JuuYQW7iYJaJbm5@postgres_unleash/unleash_db"
-      # Disable SSL for database connections. @chriswk: why do we do this?
-      DATABASE_SSL: "false"
-      # Changing log levels:
-      LOG_LEVEL: "debug"
-      # Proxy clients must use one of these keys to connect to the
-      # Proxy. To add more keys, separate them with a comma (`key1,key2`).
-      INIT_FRONTEND_API_TOKENS: "default:development.unleash-insecure-frontend-api-token"
-      # Initialize Unleash with a default set of client API tokens. To
-      # initialize Unleash with multiple tokens, separate them with a
-      # comma (`token1,token2`).
-      INIT_CLIENT_API_TOKENS: "default:development.unleash-insecure-api-token"
-      # не менять!
-      UNLEASH_SIMPLE_STRING: "c2VjcmV0"
-      ENABLE_REQUEST_LOGGER: "true"
+      DATABASE_URL: "${DATABASE_URL}"
+      DATABASE_SSL: "${DATABASE_SSL}"
+      LOG_LEVEL: "${LOG_LEVEL}"
+      INIT_FRONTEND_API_TOKENS: "${INIT_FRONTEND_API_TOKENS}"
+      INIT_CLIENT_API_TOKENS: "${INIT_CLIENT_API_TOKENS}"
+      UNLEASH_SIMPLE_STRING: "${UNLEASH_SIMPLE_STRING}"
+      ENABLE_REQUEST_LOGGER: "${ENABLE_REQUEST_LOGGER}"
     command: [ "node", "index.js" ]
     restart: always
     healthcheck:
@@ -37,7 +28,7 @@ services:
       DB_ADDR: postgres_kk
       DB_DATABASE: keycloack_db
       DB_USER: keycloack
-      DB_PASSWORD: wOuCc%K.8jW.2q
+      DB_PASSWORD: "${DB_PASSWORD_KEYCLOAK}"
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       KEYCLOAK_FRONTEND_URL: https://keycloak.tolkachev.space/auth
@@ -61,7 +52,7 @@ services:
     ports:
       - "6432:5432"
     environment:
-      POSTGRES_PASSWORD: JuuYQW7iYJaJbm5
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD_UNLEASH}"
       POSTGRES_USER: unleash
       POSTGRES_DB: unleash_db
     volumes:
@@ -72,7 +63,7 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_PASSWORD: wOuCc%K.8jW.2q
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD_KEYCLOAK}"
       POSTGRES_USER: keycloack
       POSTGRES_DB: keycloack_db
     volumes:
