@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 import { IUnleashConfig } from '../server-impl';
 import { rewriteHTML } from './rewriteHTML';
 import path from 'path';
@@ -51,10 +51,10 @@ export async function loadIndexHTML(
         FORCE_BODY: true,
     };
 
-    const cleanHTML = DOMPurify.sanitize(
-        fs.readFileSync(path.join(publicFolder, 'index.html')).toString(),
-        cleanConfig,
-    ).toString();
+    const filePath = path.resolve(publicFolder, 'index.html');
+    const fileContents = await fs.readFile(filePath, 'utf-8');
+
+    const cleanHTML = DOMPurify.sanitize(fileContents, cleanConfig).toString();
 
     return rewriteHTML(cleanHTML, baseUriPath, cdnPrefix);
 }
