@@ -205,7 +205,9 @@ export default class FeatureController extends Controller {
             ? await this.cachedFeatures(query)
             : await this.resolveFeaturesAndSegments(query);
 
-        this.logger.debug(`Get all features: ${JSON.stringify(features)}`);
+        this.logger.debug(
+            `Get all features: ${JSON.stringify(features)}, from ip ${req.ip}`,
+        );
         if (this.clientSpecService.requestSupportsSpec(req, 'segments')) {
             this.openApiService.respondWithValidation(
                 200,

@@ -1,4 +1,4 @@
-import { useApiTokens } from 'hooks/api/getters/useApiTokens/useApiTokens';
+import { IApiToken, useApiTokens } from 'hooks/api/getters/useApiTokens/useApiTokens';
 import { useTable, useGlobalFilter, useSortBy } from 'react-table';
 import { PageContent } from 'component/common/PageContent/PageContent';
 import {
@@ -26,6 +26,7 @@ import { ConditionallyRender } from 'component/common/ConditionallyRender/Condit
 import { HighlightCell } from 'component/common/Table/cells/HighlightCell/HighlightCell';
 import { Search } from 'component/common/Search/Search';
 import useHiddenColumns from 'hooks/useHiddenColumns';
+import { ExpiringDateCell } from 'component/common/Table/cells/ExpiringDateCell/ExpiringDateCell';
 
 const hiddenColumnsSmall = ['Icon', 'createdAt', 'expiresAt'];
 const hiddenColumnsFlagE = ['projects', 'environment'];
@@ -95,14 +96,20 @@ export const ApiTokenTable = () => {
                         <TableBody {...getTableBodyProps()}>
                             {rows.map(row => {
                                 prepareRow(row);
+                                const expirationDate = (row.original as IApiToken)?.expiresAt;
+                                const isExpired = expirationDate ? new Date(expirationDate) < new Date() : false;
                                 return (
-                                    <TableRow hover {...row.getRowProps()}>
-                                        {row.cells.map(cell => (
-                                            <TableCell {...cell.getCellProps()}>
-                                                {cell.render('Cell')}
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
+                                    <TableRow 
+                                    hover 
+                                    {...row.getRowProps()} 
+                                    style={{ backgroundColor: isExpired ? 'rgba(255, 0, 0, 0.05)' : undefined }}
+                                  >
+                                    {row.cells.map(cell => (
+                                      <TableCell {...cell.getCellProps()}>
+                                        {cell.render('Cell')}
+                                      </TableCell>
+                                    ))}
+                                  </TableRow>
                                 );
                             })}
                         </TableBody>
@@ -209,7 +216,7 @@ const COLUMNS = [
     {
         Header: 'Expires',
         accessor: 'expiresAt',
-        Cell: DateCell,
+        Cell: ExpiringDateCell,
         minWidth: 150,
         disableGlobalFilter: true,
     },
