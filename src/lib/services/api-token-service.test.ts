@@ -4,6 +4,8 @@ import { IUnleashConfig } from '../server-impl';
 import { ApiTokenType, IApiTokenCreate } from '../types/models/api-token';
 import FakeApiTokenStore from '../../test/fixtures/fake-api-token-store';
 import FakeEnvironmentStore from '../../test/fixtures/fake-environment-store';
+import UserService from './user-service';
+import { EmailService } from './email-service';
 
 test('Should init api token', async () => {
     const token = {
@@ -21,11 +23,16 @@ test('Should init api token', async () => {
     });
     const apiTokenStore = new FakeApiTokenStore();
     const environmentStore = new FakeEnvironmentStore();
+    const emailService = {} as EmailService;
+    const userService = {} as UserService;
     const insertCalled = new Promise((resolve) => {
         apiTokenStore.on('insert', resolve);
     });
 
-    new ApiTokenService({ apiTokenStore, environmentStore }, config);
+    new ApiTokenService({ apiTokenStore, environmentStore }, config, {
+        emailService,
+        userService,
+    });
 
     await insertCalled;
 
@@ -47,6 +54,8 @@ test("Shouldn't return frontend token when secret is undefined", async () => {
     const config: IUnleashConfig = createTestConfig({});
     const apiTokenStore = new FakeApiTokenStore();
     const environmentStore = new FakeEnvironmentStore();
+    const emailService = {} as EmailService;
+    const userService = {} as UserService;
 
     await environmentStore.create({
         name: 'default',
@@ -59,6 +68,10 @@ test("Shouldn't return frontend token when secret is undefined", async () => {
     const apiTokenService = new ApiTokenService(
         { apiTokenStore, environmentStore },
         config,
+        {
+            emailService,
+            userService,
+        },
     );
 
     await apiTokenService.createApiTokenWithProjects(token);

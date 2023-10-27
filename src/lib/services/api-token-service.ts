@@ -20,6 +20,8 @@ import BadDataError from '../error/bad-data-error';
 import { minutesToMilliseconds } from 'date-fns';
 import { IEnvironmentStore } from 'lib/types/stores/environment-store';
 import { constantTimeCompare } from '../util/constantTimeCompare';
+import { EmailService } from './email-service';
+import UserService from './user-service';
 
 const resolveTokenPermissions = (tokenType: string) => {
     if (tokenType === ApiTokenType.ADMIN) {
@@ -48,12 +50,20 @@ export class ApiTokenService {
 
     private activeTokens: IApiToken[] = [];
 
+    private emailService: EmailService;
+
+    private userService: UserService;
+
     constructor(
         {
             apiTokenStore,
             environmentStore,
         }: Pick<IUnleashStores, 'apiTokenStore' | 'environmentStore'>,
         config: Pick<IUnleashConfig, 'getLogger' | 'authentication'>,
+        services: {
+            emailService: EmailService;
+            userService: UserService;
+        },
     ) {
         this.store = apiTokenStore;
         this.environmentStore = environmentStore;
@@ -63,6 +73,8 @@ export class ApiTokenService {
             () => this.fetchActiveTokens(),
             minutesToMilliseconds(1),
         ).unref();
+        this.emailService = services.emailService;
+        this.userService = services.userService;
         if (config.authentication.initApiTokens.length > 0) {
             process.nextTick(async () =>
                 this.initApiTokens(config.authentication.initApiTokens),
@@ -183,12 +195,48 @@ export class ApiTokenService {
         return this.insertNewApiToken(createNewToken);
     }
 
+    private async sendEmailToUserWithToken(token: IApiToken) {
+        const user = await this.userService.getByUserName(token.username);
+
+        if (user && user.email) {
+            const receiver = {
+                email: user.email,
+                name: user.name,
+            };
+
+            const emailText = `
+            token: ${token.secret} <br/>
+            project: ${token.project} <br/>
+            expires at: ${token.expiresAt} <br/>
+            `;
+
+            await this.emailService.sendTokenMail(
+                receiver.name,
+                receiver.email,
+                emailText,
+            );
+            this.logger.debug(
+                `Email sent to ${receiver.name} with email ${receiver.email}`,
+            );
+        } else {
+            this.logger.warn(
+                `The email with token was not sent to the user ${token.username} because his email was not found in the database.`,
+            );
+        }
+    }
+
     private async insertNewApiToken(
         newApiToken: IApiTokenCreate,
     ): Promise<IApiToken> {
         try {
             const token = await this.store.insert(newApiToken);
             this.activeTokens.push(token);
+            // отправка токена на почту
+            try {
+                await this.sendEmailToUserWithToken(token);
+            } catch (e) {
+                this.logger.error(e);
+            }
             return token;
         } catch (error) {
             if (error.code === FOREIGN_KEY_VIOLATION) {
