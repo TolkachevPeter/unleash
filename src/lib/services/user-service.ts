@@ -184,6 +184,10 @@ class UserService {
         return this.store.getByQuery({ email });
     }
 
+    async getByUserName(username: string): Promise<IUser> {
+        return this.store.getByQuery({ username });
+    }
+
     async createUser(
         {
             username,

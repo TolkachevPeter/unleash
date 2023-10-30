@@ -31,6 +31,7 @@ export interface IEmailEnvelope {
 
 const RESET_MAIL_SUBJECT = 'Unleash - Reset your password';
 const GETTING_STARTED_SUBJECT = 'Welcome to Unleash';
+const TOKEN_MAIL_SUBJECT = 'Your Personal Token';
 
 export const MAIL_ACCEPTED = '250 Accepted';
 
@@ -179,6 +180,67 @@ export class EmailService {
                 from: this.sender,
                 to: recipient,
                 subject: GETTING_STARTED_SUBJECT,
+                html: '',
+                text: '',
+            });
+        });
+    }
+
+    async sendTokenMail(
+        name: string,
+        recipient: string,
+        personalToken: string,
+    ): Promise<IEmailEnvelope> {
+        if (this.configured()) {
+            const year = new Date().getFullYear();
+            const bodyHtml = await this.compileTemplate(
+                'personal-token',
+                TemplateFormat.HTML,
+                {
+                    personalToken,
+                    name,
+                    year,
+                },
+            );
+            const bodyText = await this.compileTemplate(
+                'personal-token',
+                TemplateFormat.PLAIN,
+                {
+                    personalToken,
+                    name,
+                    year,
+                },
+            );
+            const email = {
+                from: this.sender,
+                to: recipient,
+                subject: TOKEN_MAIL_SUBJECT,
+                html: bodyHtml,
+                text: bodyText,
+            };
+            process.nextTick(() => {
+                this.mailer.sendMail(email).then(
+                    () =>
+                        this.logger.info(
+                            'Successfully sent personal token email',
+                        ),
+                    (e) =>
+                        this.logger.warn(
+                            'Failed to send personal token email',
+                            e,
+                        ),
+                );
+            });
+            return Promise.resolve(email);
+        }
+        return new Promise((res) => {
+            this.logger.warn(
+                'No mailer is configured. Please read the docs on how to configure an emailservice',
+            );
+            res({
+                from: this.sender,
+                to: recipient,
+                subject: TOKEN_MAIL_SUBJECT,
                 html: '',
                 text: '',
             });

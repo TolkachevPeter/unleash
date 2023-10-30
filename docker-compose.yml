@@ -13,6 +13,11 @@ services:
       INIT_CLIENT_API_TOKENS: "${INIT_CLIENT_API_TOKENS}"
       UNLEASH_SIMPLE_STRING: "${UNLEASH_SIMPLE_STRING}"
       ENABLE_REQUEST_LOGGER: "${ENABLE_REQUEST_LOGGER}"
+      EMAIL_HOST: "smtp.timeweb.ru"
+      EMAIL_PORT: "25"
+      EMAIL_SENDER: 'tolkachev@tolkachev.space'
+      EMAIL_USER: '${EMAIL_USER}'
+      EMAIL_PASSWORD: '${EMAIL_PASSWORD}'
     command: [ "node", "index.js" ]
     restart: always
     healthcheck:

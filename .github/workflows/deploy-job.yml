@@ -61,6 +61,8 @@ jobs:
           POSTGRES_PASSWORD_KEYCLOAK: ${{ secrets.POSTGRES_PASSWORD_KEYCLOAK }}
           POSTGRES_USER_KEYCLOAK: ${{ secrets.POSTGRES_USER_KEYCLOAK }}
           POSTGRES_DB_KEYCLOAK: ${{ secrets.POSTGRES_DB_KEYCLOAK }}
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
 
       - name: docker ps
         run: docker ps
