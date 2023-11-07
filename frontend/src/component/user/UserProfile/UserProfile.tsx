@@ -9,6 +9,7 @@ import { IUser } from 'interfaces/user';
 import { ILocationSettings } from 'hooks/useLocationSettings';
 import { HEADER_USER_AVATAR } from 'utils/testIds';
 import unknownUser from 'assets/icons/unknownUser.png';
+import avatarDefault from 'assets/icons/avatarDefault.png';
 import { useId } from 'hooks/useId';
 
 interface IUserProfileProps {
@@ -57,6 +58,7 @@ const UserProfile = ({
 
     const email = profile ? profile.email : '';
     const imageUrl = email ? profile.imageUrl : unknownUser;
+    const [avatarSrc, setAvatarSrc] = useState(imageUrl);
 
     return (
         <ClickAwayListener onClickAway={() => setShowProfile(false)}>
@@ -77,8 +79,13 @@ const UserProfile = ({
                     <Avatar
                         style={{ backgroundColor: '#fff' }}
                         alt="Your Gravatar"
-                        src={imageUrl}
+                        src={avatarSrc}
                         data-testid={HEADER_USER_AVATAR}
+                        imgProps={{
+                            onError: (e) => {
+                                setAvatarSrc(avatarDefault);
+                            }
+                        }}
                     />
                     <KeyboardArrowDownIcon className={styles.icon} />
                 </Button>
