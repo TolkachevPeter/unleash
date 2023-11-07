@@ -47,7 +47,10 @@ export default class VersionService {
         {
             getLogger,
             versionCheck,
-        }: Pick<IUnleashConfig, 'getLogger' | 'versionCheck'>,
+        }: Pick<
+            IUnleashConfig,
+            'getLogger' | 'versionCheck' | 'enterpriseVersion'
+        >,
     ) {
         this.logger = getLogger('lib/services/version-service.js');
         this.settingStore = settingStore;
