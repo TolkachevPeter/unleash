@@ -54,6 +54,7 @@ export interface FeatureToggle extends FeatureToggleDTO {
     project: string;
     lastSeenAt?: Date;
     createdAt?: Date;
+    epic?: string | null;
 }
 
 export interface IFeatureToggleClient {
@@ -68,6 +69,7 @@ export interface IFeatureToggleClient {
     impressionData?: boolean;
     lastSeenAt?: Date;
     createdAt?: Date;
+    epic?: string | null;
 }
 
 export interface IFeatureEnvironmentInfo {

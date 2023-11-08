@@ -58,6 +58,12 @@ export interface FeatureSchema {
     description?: string;
     /**
      * 
+     * @type {string}
+     * @memberof FeatureSchema
+     */
+    epic?: string;
+    /**
+     * 
      * @type {boolean}
      * @memberof FeatureSchema
      */
@@ -148,6 +154,7 @@ export function FeatureSchemaFromJSONTyped(json: any, ignoreDiscriminator: boole
         'environments': !exists(json, 'environments') ? undefined : ((json['environments'] as Array<any>).map(FeatureEnvironmentSchemaFromJSON)),
         'strategies': !exists(json, 'strategies') ? undefined : ((json['strategies'] as Array<any>).map(StrategySchemaFromJSON)),
         'variants': !exists(json, 'variants') ? undefined : ((json['variants'] as Array<any>).map(VariantSchemaFromJSON)),
+        'epic': !exists(json, 'epic') ? undefined : json['epic'],
     };
 }
 
@@ -174,6 +181,7 @@ export function FeatureSchemaToJSON(value?: FeatureSchema | null): any {
         'environments': value.environments === undefined ? undefined : ((value.environments as Array<any>).map(FeatureEnvironmentSchemaToJSON)),
         'strategies': value.strategies === undefined ? undefined : ((value.strategies as Array<any>).map(StrategySchemaToJSON)),
         'variants': value.variants === undefined ? undefined : ((value.variants as Array<any>).map(VariantSchemaToJSON)),
+        'epic': value.epic,
     };
 }
 

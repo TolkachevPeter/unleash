@@ -72,6 +72,7 @@ export default class FeatureToggleClientStore
             'features.variants as variants',
             'features.created_at as created_at',
             'features.last_seen_at as last_seen_at',
+            'features.epic as epic',
             'fe.enabled as enabled',
             'fe.environment as environment',
             'fs.id as strategy_id',
@@ -130,7 +131,6 @@ export default class FeatureToggleClientStore
 
         const rows = await query;
         stopTimer();
-
         const featureToggles = rows.reduce((acc, r) => {
             let feature: PartialDeep<IFeatureToggleClient> = acc[r.name] ?? {
                 strategies: [],
@@ -157,6 +157,7 @@ export default class FeatureToggleClientStore
             feature.type = r.type;
             feature.variants = r.variants;
             feature.project = r.project;
+            feature.epic = r.epic;
             if (isAdmin) {
                 feature.lastSeenAt = r.last_seen_at;
                 feature.createdAt = r.created_at;
@@ -172,7 +173,6 @@ export default class FeatureToggleClientStore
             // as this breaks old versions of the Go SDK (at least).
             FeatureToggleClientStore.removeIdsFromStrategies(features);
         }
-
         return features;
     }
 

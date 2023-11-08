@@ -17,6 +17,7 @@ export const featureSchema = {
         },
         epic: {
             type: 'string',
+            nullable: true,
         },
         type: {
             type: 'string',
