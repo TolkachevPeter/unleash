@@ -329,6 +329,7 @@ class FeatureStrategiesStore implements IFeatureStrategiesStore {
                 'features.created_at as created_at',
                 'features.last_seen_at as last_seen_at',
                 'features.stale as stale',
+                'features.epic as epic',
                 'feature_environments.enabled as enabled',
                 'feature_environments.environment as environment',
                 'environments.type as environment_type',
@@ -358,6 +359,7 @@ class FeatureStrategiesStore implements IFeatureStrategiesStore {
                         createdAt: r.created_at,
                         lastSeenAt: r.last_seen_at,
                         stale: r.stale,
+                        epic: r.epic,
                         environments: [
                             FeatureStrategiesStore.getEnvironment(r),
                         ],

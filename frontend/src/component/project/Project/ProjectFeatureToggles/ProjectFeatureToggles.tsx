@@ -45,7 +45,7 @@ interface IProjectFeatureTogglesProps {
 
 type ListItemType = Pick<
     IProject['features'][number],
-    'name' | 'lastSeenAt' | 'createdAt' | 'type' | 'stale'
+    'name' | 'lastSeenAt' | 'createdAt' | 'epic' | 'type' | 'stale'
 > & {
     environments: {
         [key in string]: {
@@ -183,6 +183,13 @@ export const ProjectFeatureToggles = ({
                 sortType: 'date',
                 minWidth: 120,
             },
+            {
+                Header: 'Epic',
+                accessor: 'epic',
+                Cell: ({ value }: {value: string}) => value || '',
+                sortType: 'alphanumeric',
+                minWidth: 90,
+            },
             ...environments.map(name => ({
                 Header: loading ? () => '' : name,
                 maxWidth: 90,
@@ -241,12 +248,14 @@ export const ProjectFeatureToggles = ({
                     name,
                     lastSeenAt,
                     createdAt,
+                    epic,
                     type,
                     stale,
                     environments: featureEnvironments,
                 }) => ({
                     name,
                     lastSeenAt,
+                    epic,
                     createdAt,
                     type,
                     stale,
@@ -279,6 +288,7 @@ export const ProjectFeatureToggles = ({
                 type: '-',
                 name: 'Feature name',
                 createdAt: new Date(),
+                epic: 'epic',
                 environments: {
                     production: { name: 'production', enabled: false },
                 },
@@ -300,7 +310,7 @@ export const ProjectFeatureToggles = ({
             if (searchParams.has('columns')) {
                 const columnsInParams =
                     searchParams.get('columns')?.split(',') || [];
-                const visibleColumns = [...staticColumns, ...columnsInParams];
+                const visibleColumns = [...staticColumns, ...columnsInParams, 'epic'];
                 hiddenColumns = allColumnIds.filter(
                     columnId => !visibleColumns.includes(columnId)
                 );
@@ -308,6 +318,7 @@ export const ProjectFeatureToggles = ({
                 const visibleColumns = [
                     ...staticColumns,
                     ...storedParams.columns,
+                    'epic'
                 ];
                 hiddenColumns = allColumnIds.filter(
                     columnId => !visibleColumns.includes(columnId)

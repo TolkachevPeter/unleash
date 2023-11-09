@@ -6,6 +6,7 @@ export interface IFeatureToggleListItem {
     stale?: boolean;
     lastSeenAt?: string;
     createdAt: string;
+    epic?: string | null;
     environments: IEnvironments[];
 }
 
