@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, VFC } from 'react';
-import { Button, Link, useMediaQuery, useTheme } from '@mui/material';
+import { Link, useMediaQuery, useTheme } from '@mui/material';
 import { Link as RouterLink, useSearchParams } from 'react-router-dom';
 import { SortingRule, useFlexLayout, useSortBy, useTable } from 'react-table';
 import { TablePlaceholder, VirtualizedTable } from 'component/common/Table';
@@ -31,9 +31,76 @@ export const featuresPlaceholder: FeatureSchema[] = Array(15).fill({
 });
 
 export type PageQueryType = Partial<
-    Record<'sort' | 'order' | 'search' | 'epic', string>
+    Record<'sort' | 'order' | 'search', string>
 >;
 
+const columns = [
+    {
+        Header: 'Seen',
+        accessor: 'lastSeenAt',
+        Cell: FeatureSeenCell,
+        sortType: 'date',
+        align: 'center',
+        maxWidth: 85,
+    },
+    {
+        Header: 'Type',
+        accessor: 'type',
+        Cell: FeatureTypeCell,
+        align: 'center',
+        maxWidth: 85,
+    },
+    {
+        Header: 'Name',
+        accessor: 'name',
+        minWidth: 150,
+        Cell: FeatureNameCell,
+        sortType: 'alphanumeric',
+        searchable: true,
+    },
+    {
+        Header: 'Created',
+        accessor: 'createdAt',
+        Cell: DateCell,
+        sortType: 'date',
+        maxWidth: 150,
+    },
+    {
+        Header: 'Epic',
+        accessor: 'epic',
+        Cell: ({ value } : {value: string | null }) => (
+            <div
+            >
+                {value || ''}
+            </div>
+        ),
+        maxWidth: 200,
+    },
+    {
+        Header: 'Project ID',
+        accessor: 'project',
+        Cell: ({ value }: { value: string }) => (
+            <LinkCell title={value} to={`/projects/${value}`} />
+        ),
+        sortType: 'alphanumeric',
+        maxWidth: 150,
+        filterName: 'project',
+        searchable: true,
+    },
+    {
+        Header: 'State',
+        accessor: 'stale',
+        Cell: FeatureStaleCell,
+        sortType: 'boolean',
+        maxWidth: 120,
+        filterName: 'state',
+        filterParsing: (value: any) => (value ? 'stale' : 'active'),
+    },
+    // Always hidden -- for search
+    {
+        accessor: 'description',
+    },
+];
 
 const defaultSort: SortingRule<string> = { id: 'createdAt' };
 
@@ -48,7 +115,6 @@ export const FeatureToggleListTable: VFC = () => {
     const isMediumScreen = useMediaQuery(theme.breakpoints.down('lg'));
     const { features = [], loading } = useFeatures();
     const [searchParams, setSearchParams] = useSearchParams();
-    const [epicFilter, setEpicFilter] = useState('');
     const [initialState] = useState(() => ({
         sortBy: [
             {
@@ -60,85 +126,8 @@ export const FeatureToggleListTable: VFC = () => {
         ],
         hiddenColumns: ['description'],
         globalFilter: searchParams.get('search') || '',
-        epicFilter: searchParams.get('epic') || '',
     }));
     const [searchValue, setSearchValue] = useState(initialState.globalFilter);
-
-    const columns = useMemo(() => [
-        {
-            Header: 'Seen',
-            accessor: 'lastSeenAt',
-            Cell: FeatureSeenCell,
-            sortType: 'date',
-            align: 'center',
-            maxWidth: 85,
-        },
-        {
-            Header: 'Type',
-            accessor: 'type',
-            Cell: FeatureTypeCell,
-            align: 'center',
-            maxWidth: 85,
-        },
-        {
-            Header: 'Name',
-            accessor: 'name',
-            minWidth: 150,
-            Cell: FeatureNameCell,
-            sortType: 'alphanumeric',
-            searchable: true,
-        },
-        {
-            Header: 'Created',
-            accessor: 'createdAt',
-            Cell: DateCell,
-            sortType: 'date',
-            maxWidth: 150,
-        },
-        {
-            Header: 'Epic',
-            accessor: 'epic',
-            Cell: ({ value } : {value: string | null }) => (
-                <div
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => {
-                        if (epicFilter === value) {
-                            setEpicFilter('');
-                        } else {
-                            setEpicFilter(value || '');
-                        }
-                    }}
-                >
-                    {value || ''}
-                </div>
-            ),
-            maxWidth: 200,
-        },
-        {
-            Header: 'Project ID',
-            accessor: 'project',
-            Cell: ({ value }: { value: string }) => (
-                <LinkCell title={value} to={`/projects/${value}`} />
-            ),
-            sortType: 'alphanumeric',
-            maxWidth: 150,
-            filterName: 'project',
-            searchable: true,
-        },
-        {
-            Header: 'State',
-            accessor: 'stale',
-            Cell: FeatureStaleCell,
-            sortType: 'boolean',
-            maxWidth: 120,
-            filterName: 'state',
-            filterParsing: (value: any) => (value ? 'stale' : 'active'),
-        },
-        // Always hidden -- for search
-        {
-            accessor: 'description',
-        },
-    ], [epicFilter, setEpicFilter]);
 
     const {
         data: searchedData,
@@ -146,17 +135,14 @@ export const FeatureToggleListTable: VFC = () => {
         getSearchContext,
     } = useSearch(columns, searchValue, features);
 
-    const data = useMemo(() => {
-        if (loading) {
-            return featuresPlaceholder;
-        }
-        let filteredData = searchedData;
-        if (epicFilter) {
-            filteredData = filteredData?.filter((feature) => feature.epic === epicFilter);
-        }
-        return filteredData || [];
-    }, [searchedData, loading, epicFilter]);
-    
+    const data = useMemo(
+        () =>
+            searchedData?.length === 0 && loading
+                ? featuresPlaceholder
+                : searchedData,
+        [searchedData, loading]
+    );
+
     const {
         headerGroups,
         rows,
@@ -198,26 +184,11 @@ export const FeatureToggleListTable: VFC = () => {
             tableState.search = searchValue;
         }
 
-        if (epicFilter) {
-            tableState.epic = epicFilter;
-        }
-
         setSearchParams(tableState, {
             replace: true,
         });
         setStoredParams({ id: sortBy[0].id, desc: sortBy[0].desc || false });
-    }, [sortBy, searchValue, epicFilter, setSearchParams]);
-
-    useEffect(() => {
-        const epicSearchParams = searchParams.get('epic');
-        if (epicSearchParams) {
-            setEpicFilter(epicSearchParams);
-        }
-    }, [searchParams]);
-
-    const clearEpicFilter = () => {
-        setEpicFilter('');
-    };
+    }, [sortBy, searchValue, setSearchParams]);
 
     return (
         <PageContent
@@ -257,14 +228,6 @@ export const FeatureToggleListTable: VFC = () => {
                                 loading={false}
                                 filter={{ query: '', project: 'default' }}
                             />
-                        <ConditionallyRender
-                            condition={epicFilter.length > 0}
-                            show={
-                                <Button onClick={clearEpicFilter} variant="outlined" color="primary">
-                                    Clean epic filter
-                                </Button>
-                            }
-                        />
                         </>
                     }
                 >
