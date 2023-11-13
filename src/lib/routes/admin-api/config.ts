@@ -111,6 +111,7 @@ class ConfigController extends Controller {
             version,
             emailEnabled: this.emailService.isEnabled(),
             unleashUrl: this.config.server.unleashUrl,
+            jiraUrl: this.config.server.jiraUrl,
             baseUriPath: this.config.server.baseUriPath,
             authenticationType: this.config.authentication?.type,
             segmentValuesLimit: this.config.segmentValuesLimit,

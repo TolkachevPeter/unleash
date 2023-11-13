@@ -22,6 +22,9 @@ export const uiConfigSchema = {
         unleashUrl: {
             type: 'string',
         },
+        jiraUrl: {
+            type: 'string',
+        },
         baseUriPath: {
             type: 'string',
         },

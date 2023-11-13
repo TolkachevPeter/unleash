@@ -162,6 +162,7 @@ const defaultServerOption: IServerOption = {
     baseUriPath: formatBaseUri(process.env.BASE_URI_PATH),
     cdnPrefix: process.env.CDN_PREFIX,
     unleashUrl: process.env.UNLEASH_URL || 'http://localhost:4242',
+    jiraUrl: process.env.JIRA_URL,
     serverMetrics: true,
     keepAliveTimeout: minutesToMilliseconds(1),
     headersTimeout: secondsToMilliseconds(61),

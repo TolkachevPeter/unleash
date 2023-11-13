@@ -99,7 +99,7 @@ export const ProjectFeatureToggles = ({
 
     const { toggleFeatureEnvironmentOn, toggleFeatureEnvironmentOff } =
         useFeatureApi();
-
+    
     const onToggle = useCallback(
         async (
             projectId: string,
@@ -186,7 +186,20 @@ export const ProjectFeatureToggles = ({
             {
                 Header: 'Epic',
                 accessor: 'epic',
-                Cell: ({ value }: {value: string}) => value || '',
+                Cell: ({ value }: { value: string }) => {
+                    if (uiConfig.jiraUrl && value) {
+                        return (
+                            <a 
+                                href={`${uiConfig.jiraUrl}/jira/browse/${value}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                            >
+                                {value}
+                            </a>
+                        );
+                    }
+                    return value || '';
+                },                
                 sortType: 'alphanumeric',
                 minWidth: 90,
             },

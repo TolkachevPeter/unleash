@@ -8,6 +8,7 @@ export interface IUiConfig {
     slogan: string;
     environment?: string;
     unleashUrl?: string;
+    jiraUrl?: string;
     version: string;
     versionInfo?: IVersionInfo;
     links: ILinks[];
