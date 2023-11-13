@@ -314,6 +314,7 @@ class UserService {
                 'Logging in with username/password has been disabled.',
             );
         }
+        // this.logger.debug(`User ${usernameOrEmail} started to login`);
 
         const idQuery = isEmail(usernameOrEmail)
             ? { email: usernameOrEmail }
@@ -326,7 +327,9 @@ class UserService {
             await this.store.successfullyLogin(user);
             return user;
         }
-        throw new PasswordMismatch();
+        throw new PasswordMismatch(
+            `Wrong password, try again. User ${usernameOrEmail} tried to login.`,
+        );
     }
 
     /**
