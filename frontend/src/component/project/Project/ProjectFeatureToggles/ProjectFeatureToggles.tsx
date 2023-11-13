@@ -193,6 +193,7 @@ export const ProjectFeatureToggles = ({
                                 href={`${uiConfig.jiraUrl}/jira/browse/${value}`} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
+                                style={{ textDecoration: 'none' }}
                             >
                                 {value}
                             </a>
