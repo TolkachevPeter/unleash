@@ -319,7 +319,14 @@ class UserService {
         const idQuery = isEmail(usernameOrEmail)
             ? { email: usernameOrEmail }
             : { username: usernameOrEmail };
-        const user = await this.store.getByQuery(idQuery);
+        let user;
+        try {
+            user = await this.store.getByQuery(idQuery);
+        } catch (err) {
+            throw new NotFoundError(
+                `${usernameOrEmail} tried to logon - no user Found`,
+            );
+        }
         const passwordHash = await this.store.getPasswordHash(user.id);
 
         const match = await bcrypt.compare(password, passwordHash);
