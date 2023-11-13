@@ -314,7 +314,6 @@ class UserService {
                 'Logging in with username/password has been disabled.',
             );
         }
-        // this.logger.debug(`User ${usernameOrEmail} started to login`);
 
         const idQuery = isEmail(usernameOrEmail)
             ? { email: usernameOrEmail }
