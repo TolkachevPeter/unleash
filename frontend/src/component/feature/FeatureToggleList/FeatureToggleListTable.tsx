@@ -20,6 +20,7 @@ import { CreateFeatureButton } from '../CreateFeatureButton/CreateFeatureButton'
 import { FeatureStaleCell } from './FeatureStaleCell/FeatureStaleCell';
 import { useSearch } from 'hooks/useSearch';
 import { Search } from 'component/common/Search/Search';
+import useUiConfig from 'hooks/api/getters/useUiConfig/useUiConfig';
 
 export const featuresPlaceholder: FeatureSchema[] = Array(15).fill({
     name: 'Name of the feature',
@@ -34,73 +35,6 @@ export type PageQueryType = Partial<
     Record<'sort' | 'order' | 'search', string>
 >;
 
-const columns = [
-    {
-        Header: 'Seen',
-        accessor: 'lastSeenAt',
-        Cell: FeatureSeenCell,
-        sortType: 'date',
-        align: 'center',
-        maxWidth: 85,
-    },
-    {
-        Header: 'Type',
-        accessor: 'type',
-        Cell: FeatureTypeCell,
-        align: 'center',
-        maxWidth: 85,
-    },
-    {
-        Header: 'Name',
-        accessor: 'name',
-        minWidth: 150,
-        Cell: FeatureNameCell,
-        sortType: 'alphanumeric',
-        searchable: true,
-    },
-    {
-        Header: 'Created',
-        accessor: 'createdAt',
-        Cell: DateCell,
-        sortType: 'date',
-        maxWidth: 150,
-    },
-    {
-        Header: 'Epic',
-        accessor: 'epic',
-        Cell: ({ value } : {value: string | null }) => (
-            <div
-            >
-                {value || ''}
-            </div>
-        ),
-        maxWidth: 200,
-    },
-    {
-        Header: 'Project ID',
-        accessor: 'project',
-        Cell: ({ value }: { value: string }) => (
-            <LinkCell title={value} to={`/projects/${value}`} />
-        ),
-        sortType: 'alphanumeric',
-        maxWidth: 150,
-        filterName: 'project',
-        searchable: true,
-    },
-    {
-        Header: 'State',
-        accessor: 'stale',
-        Cell: FeatureStaleCell,
-        sortType: 'boolean',
-        maxWidth: 120,
-        filterName: 'state',
-        filterParsing: (value: any) => (value ? 'stale' : 'active'),
-    },
-    // Always hidden -- for search
-    {
-        accessor: 'description',
-    },
-];
 
 const defaultSort: SortingRule<string> = { id: 'createdAt' };
 
@@ -111,6 +45,85 @@ const { value: storedParams, setValue: setStoredParams } = createLocalStorage(
 
 export const FeatureToggleListTable: VFC = () => {
     const theme = useTheme();
+    const { uiConfig } = useUiConfig();
+    const columns = useMemo(() => {
+        return [
+            {
+                Header: 'Seen',
+                accessor: 'lastSeenAt',
+                Cell: FeatureSeenCell,
+                sortType: 'date',
+                align: 'center',
+                maxWidth: 85,
+            },
+            {
+                Header: 'Type',
+                accessor: 'type',
+                Cell: FeatureTypeCell,
+                align: 'center',
+                maxWidth: 85,
+            },
+            {
+                Header: 'Name',
+                accessor: 'name',
+                minWidth: 150,
+                Cell: FeatureNameCell,
+                sortType: 'alphanumeric',
+                searchable: true,
+            },
+            {
+                Header: 'Created',
+                accessor: 'createdAt',
+                Cell: DateCell,
+                sortType: 'date',
+                maxWidth: 150,
+            },
+            {
+                Header: 'Epic',
+                accessor: 'epic',
+                Cell: ({ value }: { value: string }) => {
+                    if (uiConfig.jiraUrl && value) {
+                        return (
+                            <a
+                                href={`${uiConfig.jiraUrl}/jira/browse/${value}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ textDecoration: 'none' }}
+                            >
+                                {value}
+                            </a>
+                        );
+                    }
+                    return value || '';
+                },
+                maxWidth: 200,
+            },
+            {
+                Header: 'Project ID',
+                accessor: 'project',
+                Cell: ({ value }: { value: string }) => (
+                    <LinkCell title={value} to={`/projects/${value}`} />
+                ),
+                sortType: 'alphanumeric',
+                maxWidth: 150,
+                filterName: 'project',
+                searchable: true,
+            },
+            {
+                Header: 'State',
+                accessor: 'stale',
+                Cell: FeatureStaleCell,
+                sortType: 'boolean',
+                maxWidth: 120,
+                filterName: 'state',
+                filterParsing: (value: any) => (value ? 'stale' : 'active'),
+            },
+            // Always hidden -- for search
+            {
+                accessor: 'description',
+            },
+        ]
+    }, [uiConfig]);
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
     const isMediumScreen = useMediaQuery(theme.breakpoints.down('lg'));
     const { features = [], loading } = useFeatures();
@@ -195,11 +208,10 @@ export const FeatureToggleListTable: VFC = () => {
             isLoading={loading}
             header={
                 <PageHeader
-                    title={`Feature toggles (${
-                        rows.length < data.length
+                    title={`Feature toggles (${rows.length < data.length
                             ? `${rows.length} of ${data.length}`
                             : data.length
-                    })`}
+                        })`}
                     actions={
                         <>
                             <ConditionallyRender
