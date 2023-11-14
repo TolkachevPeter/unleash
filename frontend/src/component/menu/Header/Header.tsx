@@ -40,6 +40,7 @@ const Header: VFC = () => {
     const theme = useTheme();
     const adminId = useId();
     const configId = useId();
+
     const [adminRef, setAdminRef] = useState<HTMLButtonElement | null>(null);
     const [configRef, setConfigRef] = useState<HTMLButtonElement | null>(null);
 
@@ -79,6 +80,10 @@ const Header: VFC = () => {
     //         .filter(filterByEnterprise),
     // };
 
+    const appBarStyle = uiConfig.headerColor
+    ? { backgroundColor: uiConfig.headerColor }
+    : {};
+
     const filteredMainRoutes = {
         mainNavRoutes: useFilteredNonAdminRoutes(routes.mainNavRoutes),
         mobileRoutes: useFilteredNonAdminRoutes(routes.mobileRoutes),
@@ -87,7 +92,7 @@ const Header: VFC = () => {
 
     if (smallScreen) {
         return (
-            <AppBar className={styles.header} position="static">
+            <AppBar className={styles.header} style={appBarStyle} position="static">
                 <Container className={styles.container}>
                     <Tooltip title="Menu" arrow>
                         <IconButton
@@ -118,7 +123,7 @@ const Header: VFC = () => {
     }
 
     return (
-        <AppBar className={styles.header} position="static">
+        <AppBar className={styles.header} style={appBarStyle} position="static">
             <Container className={styles.container}>
                 <Link
                     to="/"
