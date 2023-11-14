@@ -9,6 +9,7 @@ export interface IUiConfig {
     environment?: string;
     unleashUrl?: string;
     jiraUrl?: string;
+    headerColor?: string;
     version: string;
     versionInfo?: IVersionInfo;
     links: ILinks[];

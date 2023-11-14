@@ -163,6 +163,7 @@ const defaultServerOption: IServerOption = {
     cdnPrefix: process.env.CDN_PREFIX,
     unleashUrl: process.env.UNLEASH_URL || 'http://localhost:4242',
     jiraUrl: process.env.JIRA_URL,
+    headerColor: process.env.HEADER_COLOR,
     serverMetrics: true,
     keepAliveTimeout: minutesToMilliseconds(1),
     headersTimeout: secondsToMilliseconds(61),

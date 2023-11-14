@@ -79,6 +79,7 @@ export interface IServerOption {
     cdnPrefix?: string;
     unleashUrl: string;
     jiraUrl?: string;
+    headerColor?: string;
     serverMetrics: boolean;
     enableRequestLogger: boolean;
     gracefulShutdownEnable: boolean;

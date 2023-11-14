@@ -25,6 +25,9 @@ export const uiConfigSchema = {
         jiraUrl: {
             type: 'string',
         },
+        headerColor: {
+            type: 'string',
+        },
         baseUriPath: {
             type: 'string',
         },
