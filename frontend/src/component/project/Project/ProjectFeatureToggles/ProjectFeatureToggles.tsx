@@ -97,7 +97,7 @@ export const ProjectFeatureToggles = ({
     const { refetch } = useProject(projectId);
     const { setToastData, setToastApiError } = useToast();
 
-    const { toggleFeatureEnvironmentOn, toggleFeatureEnvironmentOff } =
+    const { toggleFeatureEnvironmentOn, toggleFeatureEnvironmentOff, toggleFeatureGetJiraStatus } =
         useFeatureApi();
     
     const onToggle = useCallback(
@@ -107,6 +107,7 @@ export const ProjectFeatureToggles = ({
             environment: string,
             enabled: boolean
         ) => {
+        let jiraStatus;
             try {
                 if (enabled) {
                     await toggleFeatureEnvironmentOn(
@@ -114,6 +115,16 @@ export const ProjectFeatureToggles = ({
                         featureName,
                         environment
                     );
+                    try {
+                        const response = await toggleFeatureGetJiraStatus(
+                            projectId,
+                            featureName,
+                        );
+                        const data = await response.json();
+                        jiraStatus = data.status;
+                    } catch(e) {
+                        console.error(e);
+                    }
                 } else {
                     await toggleFeatureEnvironmentOff(
                         projectId,
@@ -139,11 +150,11 @@ export const ProjectFeatureToggles = ({
             setToastData({
                 type: 'success',
                 title: 'Updated toggle status',
-                text: 'Successfully updated toggle status.',
+                text: `Successfully updated toggle status. ${jiraStatus ? ('Jira status: ' + jiraStatus) : ''}`,
             });
             refetch();
         },
-        [toggleFeatureEnvironmentOff, toggleFeatureEnvironmentOn] // eslint-disable-line react-hooks/exhaustive-deps
+        [toggleFeatureEnvironmentOff, toggleFeatureEnvironmentOn, toggleFeatureGetJiraStatus] // eslint-disable-line react-hooks/exhaustive-deps
     );
 
     const columns = useMemo(

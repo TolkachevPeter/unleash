@@ -933,6 +933,58 @@ class FeatureToggleService {
         }
     }
 
+    async getJiraStatusByEpic(
+        project: string,
+        featureName: string,
+    ): Promise<{ status: string }> {
+        try {
+            const { JIRA_API_URL, JIRA_USER, JIRA_API_TOKEN } = process.env;
+
+            if (!JIRA_API_URL || !JIRA_USER || !JIRA_API_TOKEN) {
+                throw new Error(
+                    `We do not check jira because there is no data for jira.`,
+                );
+            }
+
+            const { epic } = await this.featureToggleStore.get(featureName);
+
+            if (!epic) {
+                throw new Error(
+                    `We do not check jira because there is no epic for jira.`,
+                );
+            }
+
+            const url = `${process.env.JIRA_API_URL}key=${epic}`;
+            const auth = Buffer.from(
+                `${process.env.JIRA_USER}:${process.env.JIRA_API_TOKEN}`,
+            ).toString('base64');
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Basic ${auth}`,
+                    Accept: 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.status) {
+                return { status: data.status };
+            } else {
+                throw new InvalidOperationError(
+                    `Epic status check failed: ${data}`,
+                );
+            }
+        } catch (error) {
+            throw new InvalidOperationError(`${error}`);
+        }
+    }
+
     // @deprecated
     async storeFeatureUpdatedEventLegacy(
         featureName: string,
