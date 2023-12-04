@@ -70,6 +70,7 @@ export interface IFeatureToggleClient {
     lastSeenAt?: Date;
     createdAt?: Date;
     epic?: string | null;
+    lastUpdated?: Date;
 }
 
 export interface IFeatureEnvironmentInfo {
@@ -101,6 +102,7 @@ export interface IFeatureEnvironment {
     environment: string;
     featureName: string;
     enabled: boolean;
+    lastUpdated?: Date;
 }
 
 export interface IVariant {

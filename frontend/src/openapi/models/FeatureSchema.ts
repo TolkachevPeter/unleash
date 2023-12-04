@@ -103,6 +103,12 @@ export interface FeatureSchema {
      * @type {Date}
      * @memberof FeatureSchema
      */
+    lastUpdated?: Date | null;
+    /**
+     * 
+     * @type {Date}
+     * @memberof FeatureSchema
+     */
     archivedAt?: Date | null;
     /**
      * 

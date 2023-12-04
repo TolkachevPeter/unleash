@@ -79,6 +79,7 @@ export class FeatureEnvironmentStore implements IFeatureEnvironmentStore {
                 enabled: md.enabled,
                 featureName,
                 environment,
+                lastUpdated: md.last_updated,
             };
         }
         throw new NotFoundError(
@@ -95,6 +96,7 @@ export class FeatureEnvironmentStore implements IFeatureEnvironmentStore {
             enabled: r.enabled,
             featureName: r.feature_name,
             environment: r.environment,
+            lastUpdated: r.last_updated,
         }));
     }
 
@@ -200,11 +202,17 @@ export class FeatureEnvironmentStore implements IFeatureEnvironmentStore {
         featureName: string,
         enabled: boolean,
     ): Promise<number> {
-        return this.db(T.featureEnvs).update({ enabled }).where({
-            environment,
-            feature_name: featureName,
-            enabled: !enabled,
-        });
+        const now = new Date();
+        return this.db(T.featureEnvs)
+            .update({
+                enabled,
+                last_updated: now.toISOString(),
+            })
+            .where({
+                environment,
+                feature_name: featureName,
+                enabled: !enabled,
+            });
     }
 
     async connectProject(

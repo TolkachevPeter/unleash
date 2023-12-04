@@ -75,6 +75,7 @@ export default class FeatureToggleClientStore
             'features.epic as epic',
             'fe.enabled as enabled',
             'fe.environment as environment',
+            'fe.last_updated as last_updated',
             'fs.id as strategy_id',
             'fs.strategy_name as strategy_name',
             'fs.parameters as parameters',
@@ -96,7 +97,12 @@ export default class FeatureToggleClientStore
             )
             .leftJoin(
                 this.db('feature_environments')
-                    .select('feature_name', 'enabled', 'environment')
+                    .select(
+                        'feature_name',
+                        'enabled',
+                        'environment',
+                        'last_updated',
+                    )
                     .where({ environment })
                     .as('fe'),
                 'fe.feature_name',
@@ -161,6 +167,7 @@ export default class FeatureToggleClientStore
             if (isAdmin) {
                 feature.lastSeenAt = r.last_seen_at;
                 feature.createdAt = r.created_at;
+                feature.lastUpdated = r.last_updated;
             }
             acc[r.name] = feature;
             return acc;

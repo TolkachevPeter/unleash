@@ -28,7 +28,7 @@ export const featuresPlaceholder: FeatureSchema[] = Array(15).fill({
     type: '-',
     createdAt: new Date(2022, 1, 1),
     project: 'projectID',
-    epic: 'Epic Name'
+    epic: 'Epic Name',
 });
 
 export type PageQueryType = Partial<
@@ -70,6 +70,13 @@ export const FeatureToggleListTable: VFC = () => {
                 Cell: FeatureNameCell,
                 sortType: 'alphanumeric',
                 searchable: true,
+            },
+            {
+                Header: 'Last Updated',
+                accessor: 'lastUpdated',
+                Cell: DateCell,
+                sortType: 'date',
+                maxWidth: 150,
             },
             {
                 Header: 'Created',
