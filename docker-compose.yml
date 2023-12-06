@@ -77,9 +77,10 @@ services:
   unleash-proxy:
     image: unleashorg/unleash-proxy:0.10.4    
     environment:
-      UNLEASH_PROXY_CLIENT_KEYS: some-secret
-      UNLEASH_URL: https://tolkachev.space/api/
-      UNLEASH_API_TOKEN: ${INIT_CLIENT_API_TOKENS}
+      UNLEASH_PROXY_CLIENT_KEYS: "some-secret"
+      UNLEASH_URL: "https://tolkachev.space/api/"
+      UNLEASH_API_TOKEN: "${INIT_CLIENT_API_TOKENS}"
+      LOG_LEVEL: "debug"
     ports:
       - "3000:3000"
 
