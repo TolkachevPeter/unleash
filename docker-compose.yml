@@ -74,6 +74,14 @@ services:
     volumes:
       - /root/unleash/data-postgres_kk:/var/lib/postgresql/data
       - /root/unleash/backups:/backups
+  unleash-proxy:
+    image: unleashorg/unleash-proxy:0.10.4    
+    environment:
+      UNLEASH_PROXY_CLIENT_KEYS: some-secret
+      UNLEASH_URL: https://tolkachev.space/api/
+      UNLEASH_API_TOKEN: ${INIT_CLIENT_API_TOKENS}
+    ports:
+      - "3000:3000"
 
 volumes:
   pgadmin:

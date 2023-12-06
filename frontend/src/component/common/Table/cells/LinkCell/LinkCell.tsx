@@ -12,6 +12,7 @@ interface ILinkCellProps {
     to?: string;
     onClick?: () => void;
     subtitle?: string;
+    external?: boolean;
 }
 
 export const LinkCell: FC<ILinkCellProps> = ({
@@ -20,6 +21,7 @@ export const LinkCell: FC<ILinkCellProps> = ({
     onClick,
     subtitle,
     children,
+    external=false,
 }) => {
     const { classes: styles } = useStyles();
     const { searchQuery } = useSearchHighlightContext();
@@ -56,24 +58,42 @@ export const LinkCell: FC<ILinkCellProps> = ({
         </div>
     );
 
-    return to ? (
-        <Link
-            component={RouterLink}
-            to={to}
-            underline="hover"
-            className={classnames(styles.wrapper, styles.link)}
-        >
-            {content}
-        </Link>
-    ) : onClick ? (
-        <Link
-            onClick={onClick}
-            underline="hover"
-            className={classnames(styles.wrapper, styles.link)}
-        >
-            {content}
-        </Link>
-    ) : (
-        <span className={styles.wrapper}>{content}</span>
-    );
+    if (external && to) {
+        return (
+            <Link
+                href={to}
+                target="_blank"
+                rel="noopener noreferrer"
+                underline="hover"
+                className={classnames(styles.wrapper, styles.link)}
+            >
+                {content}
+            </Link>
+        );
+    } else if (to) {
+        return (
+            <Link
+                component={RouterLink}
+                to={to}
+                underline="hover"
+                className={classnames(styles.wrapper, styles.link)}
+            >
+                {content}
+            </Link>
+        );
+    } else if (onClick) {
+        return (
+            <Link
+                onClick={onClick}
+                underline="hover"
+                className={classnames(styles.wrapper, styles.link)}
+            >
+                {content}
+            </Link>
+        );
+    } else {
+        return (
+            <span className={styles.wrapper}>{content}</span>
+        );
+    }
 };

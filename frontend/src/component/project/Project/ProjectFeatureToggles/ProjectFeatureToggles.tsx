@@ -36,6 +36,7 @@ import { FeatureArchiveDialog } from 'component/common/FeatureArchiveDialog/Feat
 import { useSearch } from 'hooks/useSearch';
 import { useMediaQuery } from '@mui/material';
 import { Search } from 'component/common/Search/Search';
+import { EpicCell } from 'component/common/Table/cells/FeatureEpicCell/FeatureEpicCell';
 
 interface IProjectFeatureTogglesProps {
     features: IProject['features'];
@@ -197,23 +198,10 @@ export const ProjectFeatureToggles = ({
             {
                 Header: 'Epic',
                 accessor: 'epic',
-                Cell: ({ value }: { value: string }) => {
-                    if (uiConfig.jiraUrl && value) {
-                        return (
-                            <a 
-                                href={`${uiConfig.jiraUrl}/jira/browse/${value}`} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                style={{ textDecoration: 'none' }}
-                            >
-                                {value}
-                            </a>
-                        );
-                    }
-                    return value || '';
-                },                
+                Cell: EpicCell,
+                maxWidth: 90,
                 sortType: 'alphanumeric',
-                minWidth: 90,
+                searchable: true,
             },
             ...environments.map(name => ({
                 Header: loading ? () => '' : name,
