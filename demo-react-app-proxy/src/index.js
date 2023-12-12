@@ -6,7 +6,7 @@ import { createRoot } from 'react-dom/client';
 import { FlagProvider } from '@unleash/proxy-client-react';
 
 const config = {
-  url: 'http://91.222.236.68:3000/proxy/', // Your front-end API URL or the Unleash proxy's URL (https://<proxy-url>/proxy)
+  url: 'https://proxy.tolkachev.space/proxy/', // Your front-end API URL or the Unleash proxy's URL (https://<proxy-url>/proxy)
   clientKey: 'some-secret', // A client-side API token OR one of your proxy's designated client keys (previously known as proxy secrets)
   refreshInterval: 15, // How often (in seconds) the client should poll the proxy for updates
   appName: 'your-app-name', // The name of your application. It's only used for identifying your application
