@@ -83,6 +83,14 @@ services:
       LOG_LEVEL: "debug"
     ports:
       - "3000:3000"
+  demo-react-app:
+    container_name: demo-react-app
+    build:
+      context: ./demo-react-app-proxy
+      dockerfile: Dockerfile
+    ports:
+      - "3001:80"
+    restart: always
 
 volumes:
   pgadmin:
