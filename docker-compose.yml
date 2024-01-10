@@ -81,6 +81,7 @@ services:
       UNLEASH_URL: "http://web:4242/api/"
       UNLEASH_API_TOKEN: "${INIT_CLIENT_API_TOKENS}"
       LOG_LEVEL: "debug"
+      UNLEASH_NAME_PREFIX: "frontend-"
     ports:
       - "3000:3000"
   demo-react-app:
