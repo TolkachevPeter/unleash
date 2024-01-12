@@ -208,7 +208,7 @@ export default class FeatureController extends Controller {
         this.logger.debug(
             `Get all features: ${JSON.stringify(features)}, from ip ${
                 req.ip
-            }, with query ${query}`,
+            }, with query ${JSON.stringify(query)}`,
         );
         if (this.clientSpecService.requestSupportsSpec(req, 'segments')) {
             this.openApiService.respondWithValidation(
