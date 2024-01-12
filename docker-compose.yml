@@ -82,6 +82,7 @@ services:
       UNLEASH_API_TOKEN: "${INIT_CLIENT_API_TOKENS}"
       LOG_LEVEL: "debug"
       UNLEASH_NAME_PREFIX: "frontend-"
+      UNLEASH_ENVIRONMENT: "production"
     ports:
       - "3000:3000"
   demo-react-app:
