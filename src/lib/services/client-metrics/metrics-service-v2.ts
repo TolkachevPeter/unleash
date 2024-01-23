@@ -52,7 +52,9 @@ export default class ClientMetricsServiceV2 {
 
         this.timers.push(
             setInterval(() => {
-                this.clientMetricsStoreV2.clearMetrics(48).catch(console.error);
+                this.clientMetricsStoreV2
+                    .clearMetrics(2160)
+                    .catch(console.error);
             }, hoursToMilliseconds(12)).unref(),
         );
     }
