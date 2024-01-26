@@ -18,6 +18,7 @@ export const proxyMetricsSchema = {
                     type: 'object',
                     example: {
                         myCoolToggle: {
+                            frontendAppName: 'myFrontendAppName', // Пример использования
                             yes: 25,
                             no: 42,
                             variants: {
@@ -27,6 +28,7 @@ export const proxyMetricsSchema = {
                             },
                         },
                         myOtherToggle: {
+                            frontendAppName: 'myFrontendAppName', // Пример использования
                             yes: 0,
                             no: 100,
                         },
@@ -34,6 +36,7 @@ export const proxyMetricsSchema = {
                     additionalProperties: {
                         type: 'object',
                         properties: {
+                            frontendAppName: { type: 'string' }, // Добавляем как необязательное свойство
                             yes: { type: 'integer', minimum: 0 },
                             no: { type: 'integer', minimum: 0 },
                             variants: {

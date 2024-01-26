@@ -74,7 +74,8 @@ export default class ClientMetricsServiceV2 {
         const clientMetrics: IClientMetricsEnv[] = toggleNames
             .map((name) => ({
                 featureName: name,
-                appName: value.appName,
+                appName:
+                    value.bucket.toggles[name].frontendAppName || value.appName,
                 environment: value.environment,
                 timestamp: value.bucket.start, //we might need to approximate between start/stop...
                 yes: value.bucket.toggles[name].yes,

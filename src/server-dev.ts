@@ -8,11 +8,11 @@ process.nextTick(async () => {
         await start(
             createConfig({
                 db: {
-                    user: 'unleash_user',
-                    password: 'passord',
-                    host: 'localhost',
-                    port: 5432,
-                    database: process.env.UNLEASH_DATABASE_NAME || 'unleash',
+                    user: 'unleash',
+                    password: 'JuuYQW7iYJaJbm5',
+                    host: '91.222.236.68',
+                    port: 6432,
+                    database: process.env.UNLEASH_DATABASE_NAME || 'unleash_db',
                     schema: process.env.UNLEASH_DATABASE_SCHEMA,
                     ssl: false,
                     applicationName: 'unleash',
@@ -28,7 +28,7 @@ process.nextTick(async () => {
                 enableOAS: true,
                 // secureHeaders: true,
                 versionCheck: {
-                    enable: false,
+                    enable: true,
                 },
                 experimental: {
                     // externalResolver: unleash,
@@ -50,6 +50,7 @@ process.nextTick(async () => {
                         },
                     ],
                 },
+                enterpriseVersion: '4.15.4',
             }),
         );
     } catch (error) {

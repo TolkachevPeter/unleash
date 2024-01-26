@@ -65,6 +65,7 @@ export class ProxyService {
         ip: string,
     ): Promise<void> {
         ProxyService.assertExpectedTokenType(token);
+        console.log('registerProxyMetrics', metrics, JSON.stringify(metrics));
 
         const environment =
             this.services.clientMetricsServiceV2.resolveMetricsEnvironment(

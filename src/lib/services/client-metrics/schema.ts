@@ -7,6 +7,7 @@ const countSchema = joi
         yes: joi.number().min(0).empty('').default(0),
         no: joi.number().min(0).empty('').default(0),
         variants: joi.object().pattern(joi.string(), joi.number().min(0)),
+        frontendAppName: joi.string().optional(), // Добавлено свойство frontendAppName
     });
 
 export const clientMetricsSchema = joi

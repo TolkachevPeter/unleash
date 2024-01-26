@@ -45,6 +45,9 @@ export const clientMetricsSchema = {
                                     minimum: 0,
                                 },
                             },
+                            frontendAppName: {
+                                type: 'string',
+                            },
                         },
                     },
                 },
