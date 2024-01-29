@@ -75,11 +75,13 @@ services:
       - /root/unleash/data-postgres_kk:/var/lib/postgresql/data
       - /root/unleash/backups:/backups
   unleash-proxy:
-    image: unleashorg/unleash-proxy:0.18.2
+    build:
+      context: ./unleash-proxy
+      dockerfile: Dockerfile
     environment:
       UNLEASH_PROXY_CLIENT_KEYS: "some-secret"
       UNLEASH_URL: "http://web:4242/api/"
-      UNLEASH_API_TOKEN: "${INIT_CLIENT_API_TOKENS}"
+      UNLEASH_API_TOKEN: "*:*.0a3c5726fa7640c1dc0de049ae9da7c247213f698590c0f844ebdd34"
       LOG_LEVEL: "debug"
       UNLEASH_NAME_PREFIX: "frontend-"
     ports:

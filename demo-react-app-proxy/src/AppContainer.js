@@ -12,8 +12,8 @@ function AppContainer() {
   };
 
   const config = {
-    url: 'https://proxy.tolkachev.space/proxy/',
-    // url: 'http://localhost:3000/proxy/',
+    // url: 'https://proxy.tolkachev.space/proxy/',
+    url: 'http://localhost:3000/proxy/',
     clientKey: 'some-secret',
     refreshInterval: 15,
     appName
