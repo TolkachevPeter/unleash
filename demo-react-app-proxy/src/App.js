@@ -61,6 +61,7 @@ function App({ appName, onAppNameChange }) {
   return (
     <div className="app-container">
       <div className="input-group">
+        <p1>App Name: </p1>
         <input
           type="text"
           value={newAppName}
@@ -72,6 +73,7 @@ function App({ appName, onAppNameChange }) {
       </div>
       {error && <div className="error-message">{error}</div>}
       <div className="input-group">
+      <p1>Toggle Name: </p1>
         <input
           type="text"
           value={toggleName}
