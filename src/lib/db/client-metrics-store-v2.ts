@@ -148,7 +148,7 @@ export class ClientMetricsStoreV2 implements IClientMetricsStoreV2 {
 
     async getSeenTogglesForApp(
         appName: string,
-        hoursBack: number = 24,
+        hoursBack: number = 2160,
     ): Promise<string[]> {
         return this.db<ClientMetricsEnvTable>(TABLE)
             .distinct()

@@ -21,6 +21,7 @@ import { FeatureStaleCell } from './FeatureStaleCell/FeatureStaleCell';
 import { useSearch } from 'hooks/useSearch';
 import { Search } from 'component/common/Search/Search';
 import useUiConfig from 'hooks/api/getters/useUiConfig/useUiConfig';
+import { EpicCell } from 'component/common/Table/cells/FeatureEpicCell/FeatureEpicCell';
 
 export const featuresPlaceholder: FeatureSchema[] = Array(15).fill({
     name: 'Name of the feature',
@@ -81,22 +82,9 @@ export const FeatureToggleListTable: VFC = () => {
             {
                 Header: 'Epic',
                 accessor: 'epic',
-                Cell: ({ value }: { value: string }) => {
-                    if (uiConfig.jiraUrl && value) {
-                        return (
-                            <a
-                                href={`${uiConfig.jiraUrl}/jira/browse/${value}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{ textDecoration: 'none' }}
-                            >
-                                {value}
-                            </a>
-                        );
-                    }
-                    return value || '';
-                },
+                Cell: EpicCell,
                 maxWidth: 200,
+                searchable: true,
             },
             {
                 Header: 'Project ID',

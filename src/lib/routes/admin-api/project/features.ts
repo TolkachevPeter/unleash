@@ -135,6 +135,20 @@ export default class ProjectFeaturesController extends Controller {
 
         this.route({
             method: 'get',
+            path: `${PATH_FEATURE}/jira`,
+            handler: this.toggleFeatureGetJiraStatus,
+            permission: UPDATE_FEATURE_ENVIRONMENT,
+            middleware: [
+                openApiService.validPath({
+                    tags: ['Features'],
+                    operationId: 'toggleFeatureGetJiraStatus',
+                    responses: { 200: createResponseSchema('featureSchema') },
+                }),
+            ],
+        });
+
+        this.route({
+            method: 'get',
             path: PATH_STRATEGIES,
             handler: this.getFeatureStrategies,
             permission: NONE,
@@ -529,6 +543,19 @@ export default class ProjectFeaturesController extends Controller {
             extractUsername(req),
         );
         res.status(200).end();
+    }
+
+    async toggleFeatureGetJiraStatus(
+        req: IAuthRequest<FeatureStrategyParams, any, any, any>,
+        res: Response<{ status: string }>,
+    ): Promise<void> {
+        // const { featureName, projectId } = req.params;
+        // const jiraStatus = await this.featureService.getJiraStatusByEpic(
+        //     projectId,
+        //     featureName,
+        // );
+        // res.status(200).json(jiraStatus);
+        res.status(200).json({ status: 'PASS' });
     }
 
     async toggleFeatureEnvironmentOff(

@@ -78,6 +78,7 @@
     "coverage",
     "website",
     "scripts",
-    "frontend"
+    "frontend",
+    "demo-react-app-proxy"
   ]
 }

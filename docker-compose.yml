@@ -74,6 +74,24 @@ services:
     volumes:
       - /root/unleash/data-postgres_kk:/var/lib/postgresql/data
       - /root/unleash/backups:/backups
+  unleash-proxy:
+    image: unleashorg/unleash-proxy:0.18.2
+    environment:
+      UNLEASH_PROXY_CLIENT_KEYS: "some-secret"
+      UNLEASH_URL: "http://web:4242/api/"
+      UNLEASH_API_TOKEN: "${INIT_CLIENT_API_TOKENS}"
+      LOG_LEVEL: "debug"
+      UNLEASH_NAME_PREFIX: "frontend-"
+    ports:
+      - "3000:3000"
+  demo-react-app:
+    container_name: demo-react-app
+    build:
+      context: ./demo-react-app-proxy
+      dockerfile: Dockerfile
+    ports:
+      - "3001:80"
+    restart: always
 
 volumes:
   pgadmin:

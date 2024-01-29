@@ -36,6 +36,7 @@ import { FeatureArchiveDialog } from 'component/common/FeatureArchiveDialog/Feat
 import { useSearch } from 'hooks/useSearch';
 import { useMediaQuery } from '@mui/material';
 import { Search } from 'component/common/Search/Search';
+import { EpicCell } from 'component/common/Table/cells/FeatureEpicCell/FeatureEpicCell';
 
 interface IProjectFeatureTogglesProps {
     features: IProject['features'];
@@ -97,7 +98,7 @@ export const ProjectFeatureToggles = ({
     const { refetch } = useProject(projectId);
     const { setToastData, setToastApiError } = useToast();
 
-    const { toggleFeatureEnvironmentOn, toggleFeatureEnvironmentOff } =
+    const { toggleFeatureEnvironmentOn, toggleFeatureEnvironmentOff, toggleFeatureGetJiraStatus } =
         useFeatureApi();
     
     const onToggle = useCallback(
@@ -107,6 +108,7 @@ export const ProjectFeatureToggles = ({
             environment: string,
             enabled: boolean
         ) => {
+        let jiraStatus;
             try {
                 if (enabled) {
                     await toggleFeatureEnvironmentOn(
@@ -114,6 +116,16 @@ export const ProjectFeatureToggles = ({
                         featureName,
                         environment
                     );
+                    try {
+                        const response = await toggleFeatureGetJiraStatus(
+                            projectId,
+                            featureName,
+                        );
+                        const data = await response.json();
+                        jiraStatus = data.status;
+                    } catch(e) {
+                        console.error(e);
+                    }
                 } else {
                     await toggleFeatureEnvironmentOff(
                         projectId,
@@ -139,11 +151,11 @@ export const ProjectFeatureToggles = ({
             setToastData({
                 type: 'success',
                 title: 'Updated toggle status',
-                text: 'Successfully updated toggle status.',
+                text: `Successfully updated toggle status. ${jiraStatus ? ('Jira status: ' + jiraStatus) : ''}`,
             });
             refetch();
         },
-        [toggleFeatureEnvironmentOff, toggleFeatureEnvironmentOn] // eslint-disable-line react-hooks/exhaustive-deps
+        [toggleFeatureEnvironmentOff, toggleFeatureEnvironmentOn, toggleFeatureGetJiraStatus] // eslint-disable-line react-hooks/exhaustive-deps
     );
 
     const columns = useMemo(
@@ -186,23 +198,10 @@ export const ProjectFeatureToggles = ({
             {
                 Header: 'Epic',
                 accessor: 'epic',
-                Cell: ({ value }: { value: string }) => {
-                    if (uiConfig.jiraUrl && value) {
-                        return (
-                            <a 
-                                href={`${uiConfig.jiraUrl}/jira/browse/${value}`} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                style={{ textDecoration: 'none' }}
-                            >
-                                {value}
-                            </a>
-                        );
-                    }
-                    return value || '';
-                },                
+                Cell: EpicCell,
+                maxWidth: 90,
                 sortType: 'alphanumeric',
-                minWidth: 90,
+                searchable: true,
             },
             ...environments.map(name => ({
                 Header: loading ? () => '' : name,

@@ -1,0 +1,71 @@
+.app-container {
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+input[type="text"] {
+  padding: 8px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  padding: 8px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.error {
+  border-color: red;
+}
+
+.error-message {
+  color: red;
+  margin-top: -15px;
+  margin-bottom: 15px;
+}
+
+.flag-status {
+  padding: 8px;
+  border-radius: 4px;
+  color: white;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.flag-status.on {
+  background-color: green;
+}
+
+.flag-status.off {
+  background-color: red;
+}
+
+.instructions {
+  margin-top: 20px;
+  background-color: #f7f7f7;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #dcdcdc;
+}
+
+.instructions h2 {
+  margin-top: 0;
+}
+
+.instructions p {
+  line-height: 1.5;
+}

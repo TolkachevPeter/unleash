@@ -6,7 +6,7 @@ import { IFeatureEnvironment } from 'interfaces/featureToggle';
 import PermissionSwitch from 'component/common/PermissionSwitch/PermissionSwitch';
 import StringTruncator from 'component/common/StringTruncator/StringTruncator';
 import { UPDATE_FEATURE_ENVIRONMENT } from 'component/providers/AccessProvider/permissions';
-import React from 'react';
+import React, { useState } from 'react';
 import { formatUnknownError } from 'utils/formatUnknownError';
 import { useStyles } from './FeatureOverviewEnvSwitch.styles';
 import { useRequiredPathParam } from 'hooks/useRequiredPathParam';
@@ -26,19 +26,32 @@ const FeatureOverviewEnvSwitch = ({
 }: IFeatureOverviewEnvSwitchProps) => {
     const projectId = useRequiredPathParam('projectId');
     const featureId = useRequiredPathParam('featureId');
-    const { toggleFeatureEnvironmentOn, toggleFeatureEnvironmentOff } =
+    const { toggleFeatureEnvironmentOn, toggleFeatureEnvironmentOff, toggleFeatureGetJiraStatus } =
         useFeatureApi();
     const { refetchFeature } = useFeature(projectId, featureId);
     const { setToastData, setToastApiError } = useToast();
     const { classes: styles } = useStyles();
+    const [isRequestLoading, setIsRequestLoading] = useState(false);
 
     const handleToggleEnvironmentOn = async () => {
+        setIsRequestLoading(true);
+        let jiraStatus;
         try {
             await toggleFeatureEnvironmentOn(projectId, featureId, env.name);
+            try {
+                const response = await toggleFeatureGetJiraStatus(
+                    projectId,
+                    featureId,
+                );
+                const data = await response.json();
+                jiraStatus = data.status;
+            } catch(e) {
+                console.error(e);
+            }
             setToastData({
                 type: 'success',
                 title: `Available in ${env.name}`,
-                text: `${featureId} is now available in ${env.name} based on its defined strategies.`,
+                text: `${featureId} is now available in ${env.name} based on its defined strategies. ${jiraStatus ? ('Jira status: ' + jiraStatus) : ''}`,
             });
             refetchFeature();
             if (callback) {
@@ -53,10 +66,13 @@ const FeatureOverviewEnvSwitch = ({
             } else {
                 setToastApiError(formatUnknownError(error));
             }
+        } finally {
+            setIsRequestLoading(false);
         }
     };
 
     const handleToggleEnvironmentOff = async () => {
+        setIsRequestLoading(true);
         try {
             await toggleFeatureEnvironmentOff(projectId, featureId, env.name);
             setToastData({
@@ -70,6 +86,8 @@ const FeatureOverviewEnvSwitch = ({
             }
         } catch (error: unknown) {
             setToastApiError(formatUnknownError(error));
+        } finally {
+            setIsRequestLoading(false);
         }
     };
 
@@ -101,6 +119,7 @@ const FeatureOverviewEnvSwitch = ({
                     checked={env.enabled}
                     onChange={toggleEnvironment}
                     environmentId={env.name}
+                    disabled={isRequestLoading}
                 />
                 {content}
             </label>

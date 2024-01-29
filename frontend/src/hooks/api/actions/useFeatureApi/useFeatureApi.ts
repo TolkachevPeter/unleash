@@ -68,6 +68,26 @@ const useFeatureApi = () => {
         [createRequest, makeRequest]
     );
 
+    const toggleFeatureGetJiraStatus = useCallback(
+        async (projectId: string, featureId: string) => {
+            const path = `api/admin/projects/${projectId}/features/${featureId}/jira`;
+            const req = createRequest(
+                path,
+                { method: 'GET' },
+                'toggleFeatureGetJiraStatus'
+            );
+
+            try {
+                const res = await makeRequest(req.caller, req.id);
+
+                return res;
+            } catch (e) {
+                throw e;
+            }
+        },
+        [createRequest, makeRequest]
+    );
+
     const toggleFeatureEnvironmentOff = useCallback(
         async (projectId: string, featureId: string, environmentId: string) => {
             const path = `api/admin/projects/${projectId}/features/${featureId}/environments/${environmentId}/off`;
@@ -230,6 +250,7 @@ const useFeatureApi = () => {
         errors,
         toggleFeatureEnvironmentOn,
         toggleFeatureEnvironmentOff,
+        toggleFeatureGetJiraStatus,
         addTagToFeature,
         deleteTagFromFeature,
         archiveFeatureToggle,

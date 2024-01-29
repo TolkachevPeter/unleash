@@ -82,8 +82,30 @@ const useFeatureForm = (
             setErrors(prev => ({ ...prev, epic: 'Epic can not be empty.' }));
             return false;
         }
+    
+        const startsWithLatinLetter = /^[a-zA-Z]/.test(epic);
+        const hasLatinLetter = /[a-zA-Z]/.test(epic);
+        const hasNumber = /\d/.test(epic);
+        const hasHyphen = /-/.test(epic);
+
+        if (!startsWithLatinLetter) {
+            setErrors(prev => ({
+                ...prev,
+                epic: 'Epic must start with a Latin letter.'
+            }));
+            return false;
+        }
+    
+        if (!hasLatinLetter || !hasNumber || !hasHyphen) {
+            setErrors(prev => ({ 
+                ...prev, 
+                epic: 'Epic should include a Latin letter, a number, and a hyphen.'
+            }));
+            return false;
+        }
+    
         return true;
-    }
+    }    
 
     const clearErrors = () => {
         setErrors({});
