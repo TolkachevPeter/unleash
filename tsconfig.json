@@ -79,6 +79,7 @@
     "website",
     "scripts",
     "frontend",
-    "demo-react-app-proxy"
+    "demo-react-app-proxy",
+    "unleash-proxy",
   ]
 }
