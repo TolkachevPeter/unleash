@@ -22,8 +22,8 @@ RUN rm -rf /usr/local/lib/node_modules/npm/
 
 RUN chown -R node:node /unleash-proxy
 
-RUN apk add --no-cache tini
-ENTRYPOINT ["/sbin/tini", "--"]
+# RUN apk add --no-cache tini
+# ENTRYPOINT ["/sbin/tini", "--"]
 
 EXPOSE 4242
 
