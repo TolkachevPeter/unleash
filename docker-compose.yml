@@ -94,6 +94,19 @@ services:
     ports:
       - "3001:80"
     restart: always
+  vertica:
+    container_name: local_vertica
+    image: vertica/vertica-ce:latest
+    environment:
+      APP_DB_USER: "newdbadmin"
+      APP_DB_PASSWORD: "vertica"
+    deploy:
+      mode: global
+    ports:
+      - "5433:5433"
+    volumes:
+      - "/root/unleash/data-vertica:/data"
+    restart: always
 
 volumes:
   pgadmin:
