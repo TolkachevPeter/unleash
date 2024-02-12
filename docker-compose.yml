@@ -32,6 +32,8 @@ services:
       timeout: 1m
       retries: 5
       start_period: 15s
+    networks:
+      - unleash_network
   keycloak:
     container_name: local_keycloak
     environment:
@@ -47,6 +49,8 @@ services:
     ports:
       - "8080:8080"
     restart: always
+    networks:
+      - unleash_network
   pgadmin:
     container_name: local_pgadmin
     image: dpage/pgadmin4:6
@@ -58,6 +62,8 @@ services:
     volumes:
       - "pgadmin:/var/lib/pgadmin4"
     restart: always
+    networks:
+      - unleash_network
   postgres_unleash:
     image: postgres:latest
     ports:
@@ -69,6 +75,8 @@ services:
     volumes:
       - /root/unleash/data:/var/lib/postgresql/data
       - /root/unleash/backups:/backups
+    networks:
+      - unleash_network
   postgres_kk:
     image: postgres:latest
     ports:
@@ -80,6 +88,8 @@ services:
     volumes:
       - /root/unleash/data-postgres_kk:/var/lib/postgresql/data
       - /root/unleash/backups:/backups
+    networks:
+      - unleash_network
   unleash-proxy:
     build:
       context: ./unleash-proxy
@@ -92,6 +102,8 @@ services:
       UNLEASH_NAME_PREFIX: "frontend-"
     ports:
       - "3000:3000"
+    networks:
+      - unleash_network
   demo-react-app:
     container_name: demo-react-app
     build:
@@ -114,7 +126,17 @@ services:
       - "5444:5444"
     volumes:
       - "/root/unleash/data-vertica:/data"
+      - type: volume
+        source: vertica-data2
+        target: /data
     restart: always
+    networks:
+      - unleash_network
 
 volumes:
   pgadmin:
+  vertica-data2:
+
+networks:
+  unleash_network:
+    driver: bridge
