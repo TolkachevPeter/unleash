@@ -100,10 +100,12 @@ services:
     environment:
       APP_DB_USER: "newdbadmin"
       APP_DB_PASSWORD: "vertica"
+      TZ: "Europe/Moscow"
     deploy:
       mode: global
     ports:
       - "5433:5433"
+      - "5444:5444"
     volumes:
       - "/root/unleash/data-vertica:/data"
     restart: always
