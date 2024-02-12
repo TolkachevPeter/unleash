@@ -10,6 +10,7 @@ import { createConfig } from './create-config';
 import { addEventHook } from './event-hook';
 import registerGracefulShutdown from './util/graceful-shutdown';
 import { createDb } from './db/db-pool';
+import { createDbVertica } from './db/db-vertica';
 import sessionDb from './middleware/session-db';
 // Types
 import { IUnleash } from './types/core';
@@ -34,6 +35,8 @@ async function createApp(
     const logger = config.getLogger('server-impl.js');
     const serverVersion = version;
     const db = createDb(config);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const dbVertica = createDbVertica(config);
     const stores = createStores(config, db);
     const services = createServices(stores, config);
 

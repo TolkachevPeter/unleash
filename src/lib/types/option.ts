@@ -13,6 +13,15 @@ export interface ISSLOption {
     cert?: string;
 }
 
+export interface IVerticaOption {
+    host: string;
+    port: number;
+    user: string;
+    password: string;
+    database: string;
+    ssl?: boolean | object;
+}
+
 export interface IDBOption {
     user: string;
     password: string;
@@ -96,6 +105,7 @@ export interface IUnleashOptions {
     databaseUrl?: string;
     databaseUrlFile?: string;
     db?: Partial<IDBOption>;
+    vertica?: IVerticaOption;
     session?: Partial<ISessionOption>;
     getLogger?: LogProvider;
     logLevel?: LogLevel;
@@ -170,6 +180,7 @@ export interface ICspDomainConfig {
 
 export interface IUnleashConfig {
     db: IDBOption;
+    vertica: IVerticaOption;
     session: ISessionOption;
     getLogger: LogProvider;
     server: IServerOption;

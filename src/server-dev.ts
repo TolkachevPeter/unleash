@@ -17,6 +17,14 @@ process.nextTick(async () => {
                     ssl: false,
                     applicationName: 'unleash',
                 },
+                vertica: {
+                    host: 'localhost',
+                    port: 5433,
+                    user: 'vertica_user',
+                    password: 'vertica_password',
+                    database: 'vertica_database',
+                    ssl: false,
+                },
                 server: {
                     enableRequestLogger: true,
                     baseUriPath: '',

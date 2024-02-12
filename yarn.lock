@@ -7121,6 +7121,21 @@ uuid@^8.3.2:
   resolved "https://registry.npmjs.org/uuid/-/uuid-8.3.2.tgz"
   integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
 
+v-connection-string@1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/v-connection-string/-/v-connection-string-1.1.0.tgz#4e27f921de19d8d7492da3339c5c589e67696bc1"
+  integrity sha512-cXi3uTff5Oe0oUaAe5/9YIw5hhfw/vLhq+k3R9Ffnx5XauL4J5U+HUrdUI034p7vPbUn+olcOWpfcgfxCgB0mw==
+
+v-pool@1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/v-pool/-/v-pool-1.1.1.tgz#c30fb6213548a33be498a3633bf4eb5f57702a6a"
+  integrity sha512-JXHq9fLlS3pK4JFXfFb1ZvpSZHFqEbtb/yyUtD+GxgeweHKENiaTDSghM4OjxN/j13Jb/7mn7+sQHUeZYebPuw==
+
+v-protocol@1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/v-protocol/-/v-protocol-1.1.0.tgz#c1d1982769f569d03ebb8299a93e0b0929a49e24"
+  integrity sha512-s5gETuJj3w1Cowx8Lj48+uyngvHFfuRtBoap1TKtMAYy9BNcwtNzT1wJgts7aItAn1xoHSgp8x4+B07LRNwL3g==
+
 v8-compile-cache-lib@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/v8-compile-cache-lib/-/v8-compile-cache-lib-3.0.1.tgz#6336e8d71965cb3d35a1bbb7868445a7c05264bf"
@@ -7152,6 +7167,19 @@ vary@^1, vary@~1.1.2:
   version "1.1.2"
   resolved "https://registry.npmjs.org/vary/-/vary-1.1.2.tgz"
   integrity sha1-IpnwLG3tMNSllhsLn3RSShj2NPw=
+
+vertica-nodejs@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/vertica-nodejs/-/vertica-nodejs-1.1.1.tgz#a61eeb44e84f1ee6938d28e1308586493f81693d"
+  integrity sha512-F17SKW0i50FI+EDNoAQCscey3jfVgtKtP3uJ7BTw8J6JcsOS54M5P4sYcdrf3K0fyzV5zDXrF7AkTkitdDUYbA==
+  dependencies:
+    buffer-writer "2.0.0"
+    packet-reader "1.0.0"
+    pg-types "^2.1.0"
+    pgpass "1.x"
+    v-connection-string "1.1.0"
+    v-pool "1.1.1"
+    v-protocol "1.1.0"
 
 w3c-xmlserializer@^4.0.0:
   version "4.0.0"

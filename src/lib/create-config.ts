@@ -18,6 +18,7 @@ import {
     ICspDomainConfig,
     ICspDomainOptions,
     IClientCachingOption,
+    IVerticaOption,
 } from './types/option';
 import { getDefaultLogProvider, LogLevel, validateLogProvider } from './logger';
 import { defaultCustomAuthDenyAll } from './default-custom-auth-deny-all';
@@ -114,6 +115,21 @@ const dateHandlingCallback = (connection, callback) => {
         callback(err, connection);
     });
 };
+
+function loadVerticaConfig(options: IUnleashOptions): IVerticaOption {
+    const defaultVerticaOptions: IVerticaOption = {
+        host: process.env.VERTICA_HOST || 'localhost',
+        port: parseInt(process.env.VERTICA_PORT || '5433', 10),
+        user: process.env.VERTICA_USER || 'dbadmin',
+        password: process.env.VERTICA_PASSWORD || '',
+        database: process.env.VERTICA_DATABASE || 'vdb',
+        ssl: process.env.VERTICA_SSL
+            ? JSON.parse(process.env.VERTICA_SSL)
+            : false,
+    };
+
+    return merge(defaultVerticaOptions, options.vertica || {});
+}
 
 const defaultDbOptions: IDBOption = {
     user: process.env.DATABASE_USERNAME,
@@ -350,6 +366,7 @@ export function createConfig(options: IUnleashOptions): IUnleashConfig {
             fs.readFileSync(process.env.DATABASE_URL_FILE, 'utf-8'),
         );
     }
+    const vertica = loadVerticaConfig(options);
     const db: IDBOption = mergeAll<IDBOption>([
         defaultDbOptions,
         dbPort(extraDbOptions),
@@ -442,6 +459,7 @@ export function createConfig(options: IUnleashOptions): IUnleashConfig {
 
     return {
         db,
+        vertica,
         session,
         getLogger,
         server,

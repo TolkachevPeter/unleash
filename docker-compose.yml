@@ -18,6 +18,12 @@ services:
       EMAIL_SENDER: 'tolkachev@tolkachev.space'
       EMAIL_USER: '${EMAIL_USER}'
       EMAIL_PASSWORD: '${EMAIL_PASSWORD}'
+      VERTICA_HOST: "vertica"
+      VERTICA_PORT: "5433"
+      VERTICA_USER: "newdbadmin"
+      VERTICA_PASSWORD: "vertica"
+      VERTICA_DATABASE: "VMart"
+      VERTICA_SSL: "false"
     command: [ "node", "index.js" ]
     restart: always
     healthcheck:
