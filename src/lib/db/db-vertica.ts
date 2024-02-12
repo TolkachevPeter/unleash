@@ -1,13 +1,16 @@
-/* eslint-disable no-param-reassign */
-const Vertica = require('vertica-nodejs');
+import { Client } from 'vertica-nodejs';
 import { IUnleashConfig } from '../types/option';
 
 export function createDbVertica({
     db,
     getLogger,
 }: Pick<IUnleashConfig, 'db' | 'getLogger'>): {
-    query: (sql: any, params: any, callback: any) => void;
-    destroy: () => any;
+    query(
+        sql: string,
+        params: any[],
+        callback: (err: Error | null, res?: any) => void,
+    ): Promise<void>;
+    destroy: () => Promise<void>;
 } {
     const logger = getLogger('db-pool.js');
 
@@ -19,29 +22,41 @@ export function createDbVertica({
         database: db.database,
     };
 
-    const client = Vertica.connect(verticaConfig, (err) => {
-        if (err) {
-            logger.error('Ошибка подключения к Vertica:', err);
-            return;
+    const client = new Client(verticaConfig);
+
+    (async () => {
+        try {
+            await client.connect();
+            logger.debug('Подключение к Vertica успешно установлено.');
+            const testQuery = 'SELECT version();';
+            const testResult = await client.query(testQuery);
+            logger.debug(
+                `Тестовый запрос выполнен успешно: ${JSON.stringify(
+                    testResult,
+                )}`,
+            );
+            await client.end();
+        } catch (err) {
+            logger.error('Ошибка при тестовом подключении к Vertica:', err);
         }
-        logger.debug('Успешное подключение к Vertica');
-    });
+    })();
 
     return {
-        query: (sql, params, callback) => {
-            if (typeof params === 'function') {
-                callback = params;
-                params = [];
+        async query(sql, params, callback) {
+            try {
+                await client.connect();
+                const res = await client.query(sql, params);
+                callback(null, res);
+            } catch (err) {
+                logger.error('Ошибка выполнения запроса:', err);
+                callback(err);
+            } finally {
+                // Закрытие соединения после выполнения запроса
+                await client.end();
             }
-            client.query(sql, params, (err, res) => {
-                if (err) {
-                    logger.error('Ошибка выполнения запроса:', err);
-                    callback(err, null);
-                } else {
-                    callback(null, res);
-                }
-            });
         },
-        destroy: () => client.end(),
+        destroy: async () => {
+            await client.end();
+        },
     };
 }
