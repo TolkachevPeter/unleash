@@ -26,6 +26,9 @@ RUN yarn install --frozen-lockfile --production=true
 
 FROM node:$NODE_VERSION
 
+USER root
+RUN apk update && apk add --no-cache netcat-openbsd busybox-extras
+
 ENV NODE_ENV production
 
 WORKDIR /unleash
