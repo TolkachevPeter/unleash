@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import Vertica from 'vertica-nodejs';
+const Vertica = require('vertica-nodejs');
 import { IUnleashConfig } from '../types/option';
 
 export function createDbVertica({
