@@ -2,9 +2,9 @@ import { Client } from 'vertica-nodejs';
 import { IUnleashConfig } from '../types/option';
 
 export function createDbVertica({
-    db,
+    vertica,
     getLogger,
-}: Pick<IUnleashConfig, 'db' | 'getLogger'>): {
+}: Pick<IUnleashConfig, 'vertica' | 'getLogger'>): {
     query(
         sql: string,
         params: any[],
@@ -14,12 +14,14 @@ export function createDbVertica({
 } {
     const logger = getLogger('db-pool.js');
 
+    logger.debug('Vertica configuration: ', vertica);
+
     const verticaConfig = {
-        host: db.host,
-        port: db.port,
-        user: db.user,
-        password: db.password,
-        database: db.database,
+        host: vertica.host,
+        port: vertica.port,
+        user: vertica.user,
+        password: vertica.password,
+        database: vertica.database,
     };
 
     const client = new Client(verticaConfig);
@@ -31,13 +33,13 @@ export function createDbVertica({
             const testQuery = 'SELECT version();';
             const testResult = await client.query(testQuery);
             logger.debug(
-                `Тестовый запрос выполнен успешно: ${JSON.stringify(
-                    testResult,
-                )}`,
+                'Тестовый запрос выполнен успешно:',
+                testResult.rows[0],
             );
             await client.end();
         } catch (err) {
             logger.error('Ошибка при тестовом подключении к Vertica:', err);
+            console.error(err);
         }
     })();
 
@@ -51,7 +53,6 @@ export function createDbVertica({
                 logger.error('Ошибка выполнения запроса:', err);
                 callback(err);
             } finally {
-                // Закрытие соединения после выполнения запроса
                 await client.end();
             }
         },
