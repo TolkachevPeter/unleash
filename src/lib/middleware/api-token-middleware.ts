@@ -24,6 +24,15 @@ const isProxyApi = ({ path }) => {
 export const TOKEN_TYPE_ERROR_MESSAGE =
     'invalid token: expected a different token type for this endpoint';
 
+const decodeBasicAuth = (authHeader) => {
+    const base64Credentials = authHeader.split(' ')[1];
+    const credentials = Buffer.from(base64Credentials, 'base64').toString(
+        'ascii',
+    );
+    const [username, password] = credentials.split(':');
+    return { username, password };
+};
+
 const apiAccessMiddleware = (
     {
         getLogger,
@@ -45,7 +54,18 @@ const apiAccessMiddleware = (
         }
 
         try {
-            const apiToken = req.header('authorization');
+            const authHeader = req.header('authorization');
+            let apiToken;
+            // Обработка Basic Authentication
+            if (authHeader.startsWith('Basic')) {
+                console.log(req);
+                const { password } = decodeBasicAuth(authHeader);
+                apiToken = password;
+            } else {
+                // Обработка стандартного токена
+                apiToken = authHeader;
+            }
+
             const apiUser = apiTokenService.getUserForToken(apiToken);
             const { CLIENT, FRONTEND } = ApiTokenType;
 
