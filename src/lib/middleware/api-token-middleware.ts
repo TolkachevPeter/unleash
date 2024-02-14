@@ -29,7 +29,9 @@ const decodeBasicAuth = (authHeader) => {
     const credentials = Buffer.from(base64Credentials, 'base64').toString(
         'ascii',
     );
-    const [username, password] = credentials.split(':');
+    const separatorIndex = credentials.indexOf(':');
+    const username = credentials.substring(0, separatorIndex);
+    const password = credentials.substring(separatorIndex + 1);
     return { username, password };
 };
 
