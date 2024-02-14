@@ -58,8 +58,9 @@ const apiAccessMiddleware = (
             let apiToken;
             // Обработка Basic Authentication
             if (authHeader.startsWith('Basic')) {
-                console.log(req);
+                console.log('req', req.headers);
                 const { password } = decodeBasicAuth(authHeader);
+                console.log('password: ', password);
                 apiToken = password;
             } else {
                 // Обработка стандартного токена
