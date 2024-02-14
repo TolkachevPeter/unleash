@@ -160,3 +160,6 @@ dist
 
 # IntelliJ
 .idea
+
+
+*/server-dev.ts
