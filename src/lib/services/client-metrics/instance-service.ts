@@ -168,6 +168,23 @@ export default class ClientInstanceService {
         return this.clientApplicationsStore.getAppsForStrategy(query);
     }
 
+    async getApplicationForJira(appName: string): Promise<IApplication> {
+        const [seenToggles, application, features] = await Promise.all([
+            this.clientMetricsStoreV2.getSeenTogglesForApp(appName),
+            this.clientApplicationsStore.get(appName),
+            this.featureToggleStore.getAll(),
+        ]);
+
+        return {
+            appName: application.appName,
+            createdAt: application.createdAt,
+            seenToggles: seenToggles.map((name) => {
+                const found = features.find((f) => f.name === name);
+                return found || { name, notFound: true };
+            }),
+        };
+    }
+
     async getApplication(appName: string): Promise<IApplication> {
         const [seenToggles, application, instances, strategies, features] =
             await Promise.all([

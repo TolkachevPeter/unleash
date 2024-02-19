@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import Controller from '../controller';
 import { IUnleashConfig, IUnleashServices } from '../../types';
 import ClientInstanceService from '../../services/client-metrics/instance-service';
@@ -12,6 +12,8 @@ import {
     emptyResponse,
     getStandardResponses,
 } from '../../openapi/util/standard-responses';
+import { ApplicationSchema } from '../../openapi/spec/application-schema';
+import { createResponseSchema } from '../../openapi/util/create-response-schema';
 
 export default class ClientMetricsController extends Controller {
     logger: Logger;
@@ -60,6 +62,22 @@ export default class ClientMetricsController extends Controller {
                 }),
             ],
         });
+
+        this.route({
+            method: 'get',
+            path: '/applications/:appName',
+            handler: this.getApplication,
+            permission: NONE,
+            middleware: [
+                openApiService.validPath({
+                    tags: ['Metrics'],
+                    operationId: 'getApplication',
+                    responses: {
+                        200: createResponseSchema('applicationSchema'),
+                    },
+                }),
+            ],
+        });
     }
 
     async registerMetrics(req: IAuthRequest, res: Response): Promise<void> {
@@ -73,5 +91,16 @@ export default class ClientMetricsController extends Controller {
         } catch (e) {
             return res.status(400).end();
         }
+    }
+
+    async getApplication(
+        req: Request,
+        res: Response<ApplicationSchema>,
+    ): Promise<void> {
+        const { appName } = req.params;
+
+        const appDetails =
+            await this.clientInstanceService.getApplicationForJira(appName);
+        res.json(appDetails);
     }
 }
