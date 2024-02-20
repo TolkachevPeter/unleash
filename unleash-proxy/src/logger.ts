@@ -24,12 +24,22 @@ const resolve = (logLevel: LogLevel) => {
     return w || -1;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const stripEmptyArray = (arr: any[]) => {
     if (!arr || arr.length === 0) {
         return '';
     }
     return arr;
 };
+
+function formatMessage(message: any, args: any[]): string {
+    const completeMessage = [message, ...args]
+        .map((arg) =>
+            typeof arg === 'object' && arg !== null ? JSON.stringify(arg) : arg,
+        )
+        .join(' ');
+    return completeMessage.replace(/\r?\n|\r/g, ' ');
+}
 
 export interface Logger {
     debug(message: any, ...args: any[]): void;
@@ -78,9 +88,9 @@ export class SimpleLogger implements Logger {
             if (this.useJson) {
                 console.log(JSON.stringify({ level, message, args }));
             } else {
+                const formattedMessage = formatMessage(message, args);
                 console.log(
-                    `${level.toString().toUpperCase()}: ${message}`,
-                    stripEmptyArray(args),
+                    `${level.toString().toUpperCase()}: ${formattedMessage}`,
                 );
             }
         }
