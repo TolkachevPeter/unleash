@@ -54,6 +54,7 @@ const apiAccessMiddleware = (
         if (req.user) {
             return next();
         }
+        logger.debug('headers', req.headers);
 
         try {
             const authHeader = req.header('authorization');
@@ -68,6 +69,8 @@ const apiAccessMiddleware = (
                 // Обработка стандартного токена
                 apiToken = authHeader;
             }
+
+            logger.debug('apiToken', apiToken);
 
             const apiUser = apiTokenService.getUserForToken(apiToken);
             const { CLIENT, FRONTEND } = ApiTokenType;
