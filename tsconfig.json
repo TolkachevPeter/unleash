@@ -81,5 +81,6 @@
     "frontend",
     "demo-react-app-proxy",
     "unleash-proxy",
+    "vertica-connection-nodejs",
   ]
 }
