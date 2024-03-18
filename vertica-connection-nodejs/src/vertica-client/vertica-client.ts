@@ -1,4 +1,5 @@
 import { Client } from 'vertica-nodejs';
+import logger from '../logger/logger';
 
 const verticaConfig = {
     host: process.env.VERTICA_HOST,
@@ -13,9 +14,9 @@ const verticaClient = new Client(verticaConfig);
 
 verticaClient.connect((err: any) => {
     if (err) {
-        console.error('Ошибка подключения к Vertica:', err);
+        logger.error('Ошибка подключения к Vertica:', err);
     } else {
-        console.log('Успешное подключение к Vertica');
+        logger.info('Успешное подключение к Vertica');
     }
 });
 
