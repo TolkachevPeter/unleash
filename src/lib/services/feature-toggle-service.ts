@@ -72,6 +72,7 @@ import { Saved, Unsaved } from '../types/saved';
 import { SegmentService } from './segment-service';
 import { SetStrategySortOrderSchema } from 'lib/openapi/spec/set-strategy-sort-order-schema';
 import fetch from 'make-fetch-happen';
+import semver from 'semver';
 
 interface IFeatureContext {
     featureName: string;
@@ -80,6 +81,41 @@ interface IFeatureContext {
 
 interface IFeatureStrategyContext extends IFeatureContext {
     environment: string;
+}
+
+interface DetailItem {
+    status: string;
+    decisionSource: string;
+    date: string;
+}
+
+interface CheckDetail {
+    checkName: string;
+    status: string;
+    details: DetailItem[];
+}
+
+interface JiraResponse {
+    name?: string;
+    status: string;
+    issueTypeId?: string;
+    details: CheckDetail[];
+}
+
+interface JiraResponseDetailByCheckName {
+    component: string;
+    version: string;
+}
+
+interface JiraResponseItemByCheckName {
+    checkName: string;
+    status: string;
+    details: JiraResponseDetailByCheckName[];
+}
+
+interface ComponentVersion {
+    COMPONENT: string;
+    VERSION: string;
 }
 
 const oneOf = (values: string[], match: string) => {
@@ -915,10 +951,12 @@ class FeatureToggleService {
                 throw new Error(`Error: ${response.status}`);
             }
 
-            const data = await response.json();
+            const data: JiraResponse = await response.json();
 
             if (data.status === 'PASS' || data.status === 'BYPASSED') {
                 this.logger.debug(`Epic status ok: ${data.status}`);
+                // если ок, то сравниваем версии еще
+                this.handleAdditionalCalls(data);
                 return true;
             } else {
                 throw new InvalidOperationError(
@@ -931,6 +969,140 @@ class FeatureToggleService {
                 `Epic status check failed at Jira: ${error}`,
             );
         }
+    }
+
+    // дополнительные запросы в джиру
+    async handleAdditionalCalls(data: JiraResponse): Promise<boolean> {
+        const { JIRA_API_URL, JIRA_USER, JIRA_API_TOKEN } = process.env;
+        const auth = Buffer.from(`${JIRA_USER}:${JIRA_API_TOKEN}`).toString(
+            'base64',
+        );
+        let allPromises = [];
+
+        // Перебор всех элементов в массиве details
+        data.details.forEach((detail) => {
+            if (detail.checkName) {
+                const url = `${JIRA_API_URL}key=${data.issueTypeId}&name=${detail.checkName}`;
+
+                allPromises.push(
+                    fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            Authorization: `Basic ${auth}`,
+                            Accept: 'application/json',
+                        },
+                    }),
+                );
+            }
+        });
+
+        try {
+            // Ожидаем выполнения всех запросов
+            const responses = await Promise.all(allPromises);
+
+            // Обрабатываем каждый ответ
+            for (const response of responses) {
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status}`);
+                }
+
+                const result = await response.json();
+                this.logger.debug(
+                    `Response from JIRA for checkName: ${result}`,
+                );
+                this.compareServiceVersions(result);
+            }
+
+            return true;
+        } catch (error) {
+            this.logger.error('Error making additional calls to JIRA:', error);
+            throw new InvalidOperationError(
+                `Error during additional calls to JIRA: ${error}`,
+            );
+        }
+    }
+
+    //вытаскиваем версии и начинаем их сравнивать.
+    async compareServiceVersions(
+        jiraData: JiraResponseItemByCheckName[],
+    ): Promise<void> {
+        try {
+            const componentNames: string[] = jiraData.flatMap((item) =>
+                item.details.map((detail) => detail.component),
+            );
+
+            const verticaVersions: ComponentVersion[] =
+                await this.getVersionsByComponents(componentNames);
+
+            for (const item of jiraData) {
+                for (const detail of item.details) {
+                    const { component, version } = detail;
+
+                    const verticaVersionData = verticaVersions.find(
+                        (v) => v.COMPONENT === component,
+                    );
+                    const verticaVersion = verticaVersionData
+                        ? verticaVersionData.VERSION
+                        : null;
+
+                    if (verticaVersion) {
+                        const isVersionValid = this.compareVersions(
+                            version,
+                            verticaVersion,
+                        );
+                        this.logger.debug(
+                            `Component ${component} version check: JIRA version ${version} against Vertica version ${verticaVersion} - ${
+                                isVersionValid ? 'MATCH' : 'MISMATCH'
+                            }`,
+                        );
+                    } else {
+                        this.logger.debug(
+                            `Version for component ${component} not found in Vertica.`,
+                        );
+                    }
+                }
+            }
+        } catch (error) {
+            this.logger.error('Error comparing service versions:', error);
+            throw error;
+        }
+    }
+
+    // тут запрос в вертику делаем
+    async getVersionsByComponents(
+        components: string[],
+    ): Promise<ComponentVersion[]> {
+        const VERTICA_URL = process.env.VERTICA_URL;
+
+        try {
+            const response = await fetch(`${VERTICA_URL}/vertica`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ componentNames: components }),
+            });
+
+            if (!response.ok) {
+                throw new Error(
+                    `Failed to fetch versions, status: ${response.status}`,
+                );
+            }
+
+            const data: ComponentVersion[] = await response.json();
+            return data;
+        } catch (error) {
+            console.error(`Error in getVersionsByComponents: ${error}`);
+            throw error;
+        }
+    }
+
+    // тут непосредственно сравниваем версии через semver
+    compareVersions(version1: string, version2: string): boolean {
+        if (!semver.valid(version1) || !semver.valid(version2)) {
+            throw new Error('Invalid version number');
+        }
+        return semver.gte(version1, version2);
     }
 
     async getJiraStatusByEpic(
