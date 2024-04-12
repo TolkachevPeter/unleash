@@ -19,6 +19,10 @@ export const featureSchema = {
             type: 'string',
             nullable: true,
         },
+        lastEnabledAt: {
+            type: 'string',
+            nullable: true,
+        },
         type: {
             type: 'string',
         },

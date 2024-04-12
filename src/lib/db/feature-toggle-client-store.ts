@@ -73,6 +73,7 @@ export default class FeatureToggleClientStore
             'features.created_at as created_at',
             'features.last_seen_at as last_seen_at',
             'features.epic as epic',
+            'features.last_enabled_at as last_enabled_at',
             'fe.enabled as enabled',
             'fe.environment as environment',
             'fs.id as strategy_id',
@@ -161,6 +162,7 @@ export default class FeatureToggleClientStore
             if (isAdmin) {
                 feature.lastSeenAt = r.last_seen_at;
                 feature.createdAt = r.created_at;
+                feature.lastEnabledAt = r.last_enabled_at;
             }
             acc[r.name] = feature;
             return acc;

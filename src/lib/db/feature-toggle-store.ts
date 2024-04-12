@@ -11,6 +11,7 @@ import { IFeatureToggleStore } from '../types/stores/feature-toggle-store';
 const FEATURE_COLUMNS = [
     'name',
     'epic',
+    'last_enabled_at',
     'description',
     'type',
     'project',
@@ -145,6 +146,27 @@ export default class FeatureToggleStore implements IFeatureToggleStore {
         }
     }
 
+    async setLastEnabled(
+        toggleNames: string[],
+        isSetNull?: boolean,
+    ): Promise<void> {
+        const setTimeOrNull = isSetNull ? null : new Date();
+        try {
+            await this.db(TABLE)
+                .update({ last_enabled_at: setTimeOrNull })
+                .whereIn(
+                    'name',
+                    this.db(TABLE)
+                        .select('name')
+                        .whereIn('name', toggleNames)
+                        .forUpdate()
+                        .skipLocked(),
+                );
+        } catch (err) {
+            this.logger.error('Could not update lastEnabledAt, error: ', err);
+        }
+    }
+
     static filterByArchived: Knex.QueryCallbackWithArgs = (
         queryBuilder: Knex.QueryBuilder,
         archived: boolean,
@@ -163,6 +185,7 @@ export default class FeatureToggleStore implements IFeatureToggleStore {
         return {
             name: row.name,
             epic: row.epic,
+            lastEnabledAt: row.last_enabled_at,
             description: row.description,
             type: row.type,
             project: row.project,
@@ -190,6 +213,7 @@ export default class FeatureToggleStore implements IFeatureToggleStore {
         const row = {
             name: data.name,
             epic: data.epic,
+            last_enabled_at: data.lastEnabledAt,
             description: data.description,
             type: data.type,
             project,

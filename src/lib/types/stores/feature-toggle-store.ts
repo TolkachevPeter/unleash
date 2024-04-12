@@ -10,6 +10,7 @@ export interface IFeatureToggleQuery {
 export interface IFeatureToggleStore extends Store<FeatureToggle, string> {
     count(query?: Partial<IFeatureToggleQuery>): Promise<number>;
     setLastSeen(toggleNames: string[]): Promise<void>;
+    setLastEnabled(toggleNames: string[], isSetNull?: boolean): Promise<void>;
     getProjectId(name: string): Promise<string>;
     create(project: string, data: FeatureToggleDTO): Promise<FeatureToggle>;
     update(project: string, data: FeatureToggleDTO): Promise<FeatureToggle>;

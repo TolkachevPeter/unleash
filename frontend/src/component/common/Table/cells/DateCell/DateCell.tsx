@@ -6,9 +6,10 @@ import { TextCell } from 'component/common/Table/cells/TextCell/TextCell';
 
 interface IDateCellProps {
     value?: Date | string | null;
+    isSpecial?: boolean;
 }
 
-export const DateCell: VFC<IDateCellProps> = ({ value }) => {
+export const DateCell: VFC<IDateCellProps> = ({ value, isSpecial = false }, isRedColor = false) => {
     const { locationSettings } = useLocationSettings();
 
     const date = value
@@ -17,5 +18,11 @@ export const DateCell: VFC<IDateCellProps> = ({ value }) => {
             : formatDateYMD(parseISO(value), locationSettings.locale)
         : undefined;
 
-    return <TextCell lineClamp={1}>{date}</TextCell>;
+        const currentDate = new Date();
+        const dateValue = value instanceof Date ? value : parseISO(value!);
+        const isOld = (currentDate.getTime() - dateValue.getTime()) / (1000 * 3600 * 24) > 14;
+
+        const color = isOld && isSpecial ? 'red' : undefined;
+    
+        return <TextCell style={{ color }}>{date}</TextCell>;
 };

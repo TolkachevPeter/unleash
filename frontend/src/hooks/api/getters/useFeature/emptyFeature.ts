@@ -12,5 +12,6 @@ export const emptyFeature: IFeatureToggle = {
     variants: [],
     description: '',
     impressionData: false,
-    epic: ''
+    epic: '',
+    lastEnabledAt: '',
 };

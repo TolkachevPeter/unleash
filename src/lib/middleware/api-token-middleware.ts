@@ -54,23 +54,18 @@ const apiAccessMiddleware = (
         if (req.user) {
             return next();
         }
-        logger.debug('headers', req.headers);
 
         try {
             const authHeader = req.header('authorization');
             let apiToken;
             // Обработка Basic Authentication
             if (authHeader.startsWith('Basic')) {
-                console.log('req', req.headers);
                 const { password } = decodeBasicAuth(authHeader);
-                console.log('password: ', password);
                 apiToken = password;
             } else {
                 // Обработка стандартного токена
                 apiToken = authHeader;
             }
-
-            logger.debug('apiToken', apiToken);
 
             const apiUser = apiTokenService.getUserForToken(apiToken);
             const { CLIENT, FRONTEND } = ApiTokenType;

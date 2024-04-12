@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, VFC } from 'react';
 import { Link, useMediaQuery, useTheme } from '@mui/material';
 import { Link as RouterLink, useSearchParams } from 'react-router-dom';
-import { SortingRule, useFlexLayout, useSortBy, useTable } from 'react-table';
+import { CellProps, SortingRule, useFlexLayout, useSortBy, useTable } from 'react-table';
 import { TablePlaceholder, VirtualizedTable } from 'component/common/Table';
 import { useFeatures } from 'hooks/api/getters/useFeatures/useFeatures';
 import { SearchHighlightProvider } from 'component/common/Table/SearchHighlightContext/SearchHighlightContext';
@@ -28,6 +28,7 @@ export const featuresPlaceholder: FeatureSchema[] = Array(15).fill({
     description: 'Short description of the feature',
     type: '-',
     createdAt: new Date(2022, 1, 1),
+    lastEnabledAt: new Date(2022, 1, 1),
     project: 'projectID',
     epic: 'Epic Name'
 });
@@ -77,7 +78,14 @@ export const FeatureToggleListTable: VFC = () => {
                 accessor: 'createdAt',
                 Cell: DateCell,
                 sortType: 'date',
-                maxWidth: 150,
+                maxWidth: 130,
+            },
+            {
+                Header: 'Last enabled',
+                accessor: 'lastEnabledAt',
+                Cell: ({ value }: CellProps<object, Date | string | null>) => <DateCell value={value} isSpecial={true} />,
+                sortType: 'date',
+                maxWidth: 130,
             },
             {
                 Header: 'Epic',
@@ -170,7 +178,7 @@ export const FeatureToggleListTable: VFC = () => {
             hiddenColumns.push('lastSeenAt', 'stale');
         }
         if (isSmallScreen) {
-            hiddenColumns.push('type', 'createdAt');
+            hiddenColumns.push('type', 'createdAt', 'lastEnabledAt');
         }
         setHiddenColumns(hiddenColumns);
     }, [setHiddenColumns, isSmallScreen, isMediumScreen]);
@@ -247,7 +255,7 @@ export const FeatureToggleListTable: VFC = () => {
         >
             <SearchHighlightProvider value={getSearchText(searchValue)}>
                 <VirtualizedTable
-                    rows={rows}
+                    rows={rows}                  
                     headerGroups={headerGroups}
                     prepareRow={prepareRow}
                 />

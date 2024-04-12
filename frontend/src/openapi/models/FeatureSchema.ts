@@ -103,6 +103,12 @@ export interface FeatureSchema {
      * @type {Date}
      * @memberof FeatureSchema
      */
+    lastEnabledAt?: Date | null;
+    /**
+     * 
+     * @type {Date}
+     * @memberof FeatureSchema
+     */
     archivedAt?: Date | null;
     /**
      * 
@@ -149,6 +155,7 @@ export function FeatureSchemaFromJSONTyped(json: any, ignoreDiscriminator: boole
         'stale': !exists(json, 'stale') ? undefined : json['stale'],
         'impressionData': !exists(json, 'impressionData') ? undefined : json['impressionData'],
         'createdAt': !exists(json, 'createdAt') ? undefined : (json['createdAt'] === null ? null : new Date(json['createdAt'])),
+        'lastEnabledAt': !exists(json, 'lastEnabledAt') ? undefined : (json['lastEnabledAt'] === null ? null : new Date(json['lastEnabledAt'])),
         'archivedAt': !exists(json, 'archivedAt') ? undefined : (json['archivedAt'] === null ? null : new Date(json['archivedAt'])),
         'lastSeenAt': !exists(json, 'lastSeenAt') ? undefined : (json['lastSeenAt'] === null ? null : new Date(json['lastSeenAt'])),
         'environments': !exists(json, 'environments') ? undefined : ((json['environments'] as Array<any>).map(FeatureEnvironmentSchemaFromJSON)),
@@ -176,6 +183,7 @@ export function FeatureSchemaToJSON(value?: FeatureSchema | null): any {
         'stale': value.stale,
         'impressionData': value.impressionData,
         'createdAt': value.createdAt === undefined ? undefined : (value.createdAt === null ? null : value.createdAt.toISOString().substr(0,10)),
+        'lastEnabledAt': value.lastEnabledAt === undefined ? undefined : (value.lastEnabledAt === null ? null : value.lastEnabledAt.toISOString().substr(0,10)),
         'archivedAt': value.archivedAt === undefined ? undefined : (value.archivedAt === null ? null : value.archivedAt.toISOString().substr(0,10)),
         'lastSeenAt': value.lastSeenAt === undefined ? undefined : (value.lastSeenAt === null ? null : value.lastSeenAt.toISOString().substr(0,10)),
         'environments': value.environments === undefined ? undefined : ((value.environments as Array<any>).map(FeatureEnvironmentSchemaToJSON)),

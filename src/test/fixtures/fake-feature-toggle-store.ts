@@ -121,6 +121,15 @@ export default class FakeFeatureToggleStore implements IFeatureToggleStore {
         });
     }
 
+    async setLastEnabled(toggleNames: string[]): Promise<void> {
+        toggleNames.forEach((t) => {
+            const toUpdate = this.features.find((f) => f.name === t);
+            if (toUpdate) {
+                toUpdate.lastSeenAt = new Date();
+            }
+        });
+    }
+
     async getVariants(featureName: string): Promise<IVariant[]> {
         const feature = await this.get(featureName);
         return feature.variants as IVariant[];

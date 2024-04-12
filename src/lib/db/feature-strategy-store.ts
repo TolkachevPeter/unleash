@@ -207,6 +207,7 @@ class FeatureStrategiesStore implements IFeatureStrategiesStore {
             .select(
                 'features.name as name',
                 'features.epic as epic',
+                'features.last_enabled_at as last_enabled_at',
                 'features.description as description',
                 'features.type as type',
                 'features.project as project',
@@ -258,6 +259,7 @@ class FeatureStrategiesStore implements IFeatureStrategiesStore {
                 }
                 acc.name = r.name;
                 acc.epic = r.epic;
+                acc.last_enabled_at = r.last_enabled_at;
                 acc.impressionData = r.impression_data;
                 acc.description = r.description;
                 acc.project = r.project;
@@ -330,6 +332,7 @@ class FeatureStrategiesStore implements IFeatureStrategiesStore {
                 'features.last_seen_at as last_seen_at',
                 'features.stale as stale',
                 'features.epic as epic',
+                'features.last_enabled_at as last_enabled_at',
                 'feature_environments.enabled as enabled',
                 'feature_environments.environment as environment',
                 'environments.type as environment_type',
@@ -360,6 +363,7 @@ class FeatureStrategiesStore implements IFeatureStrategiesStore {
                         lastSeenAt: r.last_seen_at,
                         stale: r.stale,
                         epic: r.epic,
+                        lastEnabledAt: r.last_enabled_at,
                         environments: [
                             FeatureStrategiesStore.getEnvironment(r),
                         ],

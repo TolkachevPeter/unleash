@@ -892,6 +892,15 @@ class FeatureToggleService {
                 }
                 const { epic } = await this.featureToggleStore.get(featureName);
                 await this.checkJiraEpic(epic);
+
+                if (environment === 'production') {
+                    this.featureToggleStore.setLastEnabled([featureName]);
+                }
+            } else {
+                // обнуляем дату lastEnabled при выключении тоггла
+                if (environment === 'production') {
+                    this.featureToggleStore.setLastEnabled([featureName], true);
+                }
             }
 
             const updatedEnvironmentStatus =

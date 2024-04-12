@@ -7,6 +7,7 @@ export interface IFeatureToggleListItem {
     lastSeenAt?: string;
     createdAt: string;
     epic?: string | null;
+    lastEnabledAt?: string;
     environments: IEnvironments[];
 }
 
@@ -21,6 +22,7 @@ export interface IFeatureToggle {
     enabled?: boolean;
     createdAt: string;
     lastSeenAt?: string;
+    lastEnabledAt?: string;
     description?: string;
     environments: IFeatureEnvironment[];
     name: string;

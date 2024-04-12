@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTheme } from '@mui/system';
 import { Add } from '@mui/icons-material';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useFlexLayout, useSortBy, useTable, SortingRule } from 'react-table';
+import { useFlexLayout, useSortBy, useTable, SortingRule, CellProps } from 'react-table';
 import { ConditionallyRender } from 'component/common/ConditionallyRender/ConditionallyRender';
 import { PageHeader } from 'component/common/PageHeader/PageHeader';
 import { PageContent } from 'component/common/PageContent/PageContent';
@@ -46,7 +46,7 @@ interface IProjectFeatureTogglesProps {
 
 type ListItemType = Pick<
     IProject['features'][number],
-    'name' | 'lastSeenAt' | 'createdAt' | 'epic' | 'type' | 'stale'
+    'name' | 'lastSeenAt' | 'createdAt' | 'lastEnabledAt' | 'epic' | 'type' | 'stale'
 > & {
     environments: {
         [key in string]: {
@@ -196,6 +196,13 @@ export const ProjectFeatureToggles = ({
                 minWidth: 120,
             },
             {
+                Header: 'Last enabled',
+                accessor: 'lastEnabledAt',
+                Cell: ({ value }: CellProps<object, Date | string | null>) => <DateCell value={value} isSpecial={true} />,
+                sortType: 'date',
+                minWidth: 120,
+            },
+            {
                 Header: 'Epic',
                 accessor: 'epic',
                 Cell: EpicCell,
@@ -261,6 +268,7 @@ export const ProjectFeatureToggles = ({
                     name,
                     lastSeenAt,
                     createdAt,
+                    lastEnabledAt,
                     epic,
                     type,
                     stale,
@@ -270,6 +278,7 @@ export const ProjectFeatureToggles = ({
                     lastSeenAt,
                     epic,
                     createdAt,
+                    lastEnabledAt,
                     type,
                     stale,
                     environments: Object.fromEntries(
@@ -301,6 +310,7 @@ export const ProjectFeatureToggles = ({
                 type: '-',
                 name: 'Feature name',
                 createdAt: new Date(),
+                lastEnabledAt: new Date(),
                 epic: 'epic',
                 environments: {
                     production: { name: 'production', enabled: false },

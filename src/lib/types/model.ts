@@ -55,6 +55,7 @@ export interface FeatureToggle extends FeatureToggleDTO {
     lastSeenAt?: Date;
     createdAt?: Date;
     epic?: string | null;
+    lastEnabledAt?: Date | null;
 }
 
 export interface IFeatureToggleClient {
@@ -70,6 +71,7 @@ export interface IFeatureToggleClient {
     lastSeenAt?: Date;
     createdAt?: Date;
     epic?: string | null;
+    lastEnabledAt?: Date | null;
 }
 
 export interface IFeatureEnvironmentInfo {
