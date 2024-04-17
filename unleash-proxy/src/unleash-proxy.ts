@@ -408,6 +408,7 @@ If you don't provide the \`toggles\` property, then this operation functions exa
         const client = await this.getClientForAppName(appName);
         const { context } = res.locals;
         const toggles = client.getEnabledToggles(context);
+        this.logger.debug(`Enabled toggles for ${appName}: `, toggles);
         res.set('Cache-control', 'public, max-age=2');
         res.send({ toggles });
     }

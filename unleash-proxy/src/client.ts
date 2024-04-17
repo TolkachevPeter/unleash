@@ -199,8 +199,6 @@ class Client extends EventEmitter implements IClient {
                 );
             }
         });
-
-        console.log('Отправляемые метрики:', JSON.stringify(metrics, null, 2));
     }
 
     destroy(): void {
