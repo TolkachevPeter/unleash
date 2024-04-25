@@ -5,6 +5,8 @@ export interface IFeatureToggleQuery {
     archived: boolean;
     project: string;
     stale: boolean;
+    createdAfter?: string;
+    createdBefore?: string;
 }
 
 export interface IFeatureToggleStore extends Store<FeatureToggle, string> {
@@ -17,6 +19,9 @@ export interface IFeatureToggleStore extends Store<FeatureToggle, string> {
     archive(featureName: string): Promise<FeatureToggle>;
     revive(featureName: string): Promise<FeatureToggle>;
     getAll(query?: Partial<IFeatureToggleQuery>): Promise<FeatureToggle[]>;
+    getAllByDates?(
+        query?: Partial<IFeatureToggleQuery>,
+    ): Promise<FeatureToggle[]>;
     getVariants(featureName: string): Promise<IVariant[]>;
     saveVariants(
         project: string,

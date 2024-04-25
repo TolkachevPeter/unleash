@@ -659,6 +659,44 @@ export default class StateService {
         );
     }
 
+    async exportByDates({
+        createdAfter,
+        createdBefore,
+    }: IExportIncludeOptions & {
+        createdAfter?: string;
+        createdBefore?: string;
+    }): Promise<{
+        features: FeatureToggle[];
+        featureStrategies: IFeatureStrategy[];
+        featureEnvironments: IFeatureEnvironment[];
+    }> {
+        const features = await this.toggleStore.getAllByDates({
+            archived: false,
+            createdAfter,
+            createdBefore,
+        });
+
+        const [allFeatureStrategies, allFeatureEnvironments] =
+            await Promise.all([
+                this.featureStrategiesStore.getAll(),
+                this.featureEnvironmentStore.getAll(),
+            ]);
+
+        const featureNamesSet = new Set(features.map((f) => f.name));
+        const filteredFeatureStrategies = allFeatureStrategies.filter((fS) =>
+            featureNamesSet.has(fS.featureName),
+        );
+        const filteredFeatureEnvironments = allFeatureEnvironments.filter(
+            (fE) => featureNamesSet.has(fE.featureName),
+        );
+
+        return {
+            features,
+            featureStrategies: filteredFeatureStrategies,
+            featureEnvironments: filteredFeatureEnvironments,
+        };
+    }
+
     async export({
         includeFeatureToggles = true,
         includeStrategies = true,

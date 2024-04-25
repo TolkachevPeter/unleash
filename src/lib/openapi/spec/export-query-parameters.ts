@@ -136,6 +136,28 @@ export const exportQueryParameters = [
             'Whether environments should be included in the exported data.',
         in: 'query',
     },
+    {
+        name: 'createdAfter',
+        schema: {
+            type: 'string',
+            format: 'date-time',
+            pattern: '^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$',
+        },
+        description:
+            'Filter to include items created after this date (ISO date-time format).',
+        in: 'query',
+    },
+    {
+        name: 'createdBefore',
+        schema: {
+            type: 'string',
+            format: 'date-time',
+            pattern: '^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$',
+        },
+        description:
+            'Filter to include items created before this date (ISO date-time format).',
+        in: 'query',
+    },
 ] as const;
 
 export type ExportQueryParameters = FromQueryParams<

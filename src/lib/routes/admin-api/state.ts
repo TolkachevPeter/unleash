@@ -84,6 +84,23 @@ class StateController extends Controller {
                 }),
             ],
         });
+        this.route({
+            method: 'get',
+            path: '/export-by-dates',
+            permission: ADMIN,
+            handler: this.exportByDates,
+            middleware: [
+                this.openApiService.validPath({
+                    tags: ['Import/Export'],
+                    operationId: 'export',
+                    responses: {
+                        200: createResponseSchema('stateSchema'),
+                    },
+                    parameters:
+                        exportQueryParameters as unknown as OpenAPIV3.ParameterObject[],
+                }),
+            ],
+        });
     }
 
     async import(req: IAuthRequest, res: Response): Promise<void> {
@@ -136,6 +153,32 @@ class StateController extends Controller {
             includeProjects,
             includeTags,
             includeEnvironments,
+        });
+        const timestamp = formatDate(Date.now(), 'yyyy-MM-dd_HH-mm-ss');
+        if (format === 'yaml') {
+            if (downloadFile) {
+                res.attachment(`export-${timestamp}.yml`);
+            }
+            res.type('yaml').send(YAML.dump(data, { skipInvalid: true }));
+        } else {
+            if (downloadFile) {
+                res.attachment(`export-${timestamp}.json`);
+            }
+            res.json(data);
+        }
+    }
+
+    async exportByDates(
+        req: Request<unknown, unknown, unknown, ExportQueryParameters>,
+        res: Response,
+    ): Promise<void> {
+        const { format, createdAfter, createdBefore } = req.query;
+
+        const downloadFile = paramToBool(req.query.download, false);
+
+        const data = await this.stateService.exportByDates({
+            createdAfter,
+            createdBefore,
         });
         const timestamp = formatDate(Date.now(), 'yyyy-MM-dd_HH-mm-ss');
         if (format === 'yaml') {
