@@ -2,7 +2,7 @@ version: "3.9"
 services:
   web:
     container_name: local_unleash
-    image: petertolkachev/unleash_4.15.4:latest
+    image: dockerhub.timeweb.cloud/petertolkachev/unleash_4.15.4:latest
     ports:
       - "4242:4242"
     environment:
@@ -55,7 +55,7 @@ services:
   #     - unleash_network
   pgadmin:
     container_name: local_pgadmin
-    image: dpage/pgadmin4:6
+    image: dockerhub.timeweb.cloud/dpage/pgadmin4:6
     environment:
       PGADMIN_DEFAULT_EMAIL: unleash@tolkachev.space
       PGADMIN_DEFAULT_PASSWORD: unleash
@@ -67,7 +67,7 @@ services:
     networks:
       - unleash_network
   postgres_unleash:
-    image: postgres:latest
+    image: dockerhub.timeweb.cloud/postgres:latest
     ports:
       - "6432:5432"
     environment:
@@ -117,7 +117,7 @@ services:
     restart: always
   vertica:
     container_name: local_vertica
-    image: vertica/vertica-ce:latest
+    image: dockerhub.timeweb.cloud/vertica/vertica-ce:latest
     environment:
       APP_DB_USER: "newdbadmin"
       APP_DB_PASSWORD: "vertica"
