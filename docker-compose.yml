@@ -1,8 +1,10 @@
 version: "3.9"
 services:
   web:
-    container_name: local_unleash
-    image: dockerhub.timeweb.cloud/petertolkachev/unleash_4.15.4:latest
+    container_name: web
+    image: web:1
+    build:
+      context: "."
     ports:
       - "4242:4242"
     environment:
@@ -32,8 +34,8 @@ services:
       timeout: 1m
       retries: 5
       start_period: 15s
-    depends_on:
-      - vertica
+    # depends_on:
+    #   - vertica
     networks:
       - unleash_network
   # keycloak:
@@ -115,30 +117,30 @@ services:
     ports:
       - "3001:80"
     restart: always
-  vertica:
-    container_name: local_vertica
-    image: dockerhub.timeweb.cloud/vertica/vertica-ce:latest
-    environment:
-      APP_DB_USER: "newdbadmin"
-      APP_DB_PASSWORD: "vertica"
-      TZ: "Europe/Moscow"
-    deploy:
-      mode: global
-    ports:
-      - "5433:5433"
-      - "5444:5444"
-    volumes:
-      - "/root/unleash/data-vertica:/data"
-      - type: volume
-        source: vertica-data2
-        target: /data
-    restart: always
-    networks:
-      - unleash_network
+  # vertica:
+  #   container_name: local_vertica
+  #   image: dockerhub.timeweb.cloud/vertica/vertica-ce:latest
+  #   environment:
+  #     APP_DB_USER: "newdbadmin"
+  #     APP_DB_PASSWORD: "vertica"
+  #     TZ: "Europe/Moscow"
+  #   deploy:
+  #     mode: global
+  #   ports:
+  #     - "5433:5433"
+  #     - "5444:5444"
+  #   volumes:
+  #     - "/root/unleash/data-vertica:/data"
+  #     - type: volume
+  #       source: vertica-data2
+  #       target: /data
+  #   restart: always
+  #   networks:
+  #     - unleash_network
 
 volumes:
   pgadmin:
-  vertica-data2:
+  # vertica-data2:
 
 networks:
   unleash_network:
