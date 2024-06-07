@@ -666,6 +666,7 @@ export default class StateService {
         createdAfter?: string;
         createdBefore?: string;
     }): Promise<{
+        version: number;
         features: FeatureToggle[];
         featureStrategies: IFeatureStrategy[];
         featureEnvironments: IFeatureEnvironment[];
@@ -691,6 +692,7 @@ export default class StateService {
         );
 
         return {
+            version: 3,
             features,
             featureStrategies: filteredFeatureStrategies,
             featureEnvironments: filteredFeatureEnvironments,
