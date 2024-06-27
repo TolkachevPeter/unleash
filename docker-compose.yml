@@ -1,10 +1,8 @@
 version: "3.9"
 services:
   web:
-    container_name: web
-    image: web:1
-    build:
-      context: "."
+    container_name: local_unleash
+    image: petertolkachev/unleash_4.15.4:latest
     ports:
       - "4242:4242"
     environment:
@@ -20,12 +18,6 @@ services:
       EMAIL_SENDER: 'tolkachev@tolkachev.space'
       EMAIL_USER: '${EMAIL_USER}'
       EMAIL_PASSWORD: '${EMAIL_PASSWORD}'
-      VERTICA_HOST: "vertica"
-      VERTICA_PORT: "5433"
-      VERTICA_USER: "newdbadmin"
-      VERTICA_PASSWORD: "vertica"
-      VERTICA_DATABASE: "VMart"
-      VERTICA_SSL: "false"
     command: [ "node", "index.js" ]
     restart: always
     healthcheck:
@@ -34,8 +26,6 @@ services:
       timeout: 1m
       retries: 5
       start_period: 15s
-    # depends_on:
-    #   - vertica
     networks:
       - unleash_network
   # keycloak:
@@ -57,7 +47,7 @@ services:
   #     - unleash_network
   pgadmin:
     container_name: local_pgadmin
-    image: dockerhub.timeweb.cloud/dpage/pgadmin4:6
+    image: dpage/pgadmin4:6
     environment:
       PGADMIN_DEFAULT_EMAIL: unleash@tolkachev.space
       PGADMIN_DEFAULT_PASSWORD: unleash
@@ -69,7 +59,7 @@ services:
     networks:
       - unleash_network
   postgres_unleash:
-    image: dockerhub.timeweb.cloud/postgres:latest
+    image: postgres:latest
     ports:
       - "6432:5432"
     environment:
@@ -117,31 +107,158 @@ services:
     ports:
       - "3001:80"
     restart: always
-  # vertica:
-  #   container_name: local_vertica
-  #   image: dockerhub.timeweb.cloud/vertica/vertica-ce:latest
-  #   environment:
-  #     APP_DB_USER: "newdbadmin"
-  #     APP_DB_PASSWORD: "vertica"
-  #     TZ: "Europe/Moscow"
-  #   deploy:
-  #     mode: global
-  #   ports:
-  #     - "5433:5433"
-  #     - "5444:5444"
-  #   volumes:
-  #     - "/root/unleash/data-vertica:/data"
-  #     - type: volume
-  #       source: vertica-data2
-  #       target: /data
-  #   restart: always
-  #   networks:
-  #     - unleash_network
 
 volumes:
   pgadmin:
-  # vertica-data2:
 
 networks:
   unleash_network:
     driver: bridge
+
+# version: "3.9"
+# services:
+#   web:
+#     container_name: web
+#     image: web:1
+#     build:
+#       context: "."
+#     ports:
+#       - "4242:4242"
+#     environment:
+#       DATABASE_URL: "${DATABASE_URL}"
+#       DATABASE_SSL: "${DATABASE_SSL}"
+#       LOG_LEVEL: "${LOG_LEVEL}"
+#       INIT_FRONTEND_API_TOKENS: "${INIT_FRONTEND_API_TOKENS}"
+#       INIT_CLIENT_API_TOKENS: "${INIT_CLIENT_API_TOKENS}"
+#       UNLEASH_SIMPLE_STRING: "${UNLEASH_SIMPLE_STRING}"
+#       ENABLE_REQUEST_LOGGER: "${ENABLE_REQUEST_LOGGER}"
+#       EMAIL_HOST: "smtp.timeweb.ru"
+#       EMAIL_PORT: "25"
+#       EMAIL_SENDER: 'tolkachev@tolkachev.space'
+#       EMAIL_USER: '${EMAIL_USER}'
+#       EMAIL_PASSWORD: '${EMAIL_PASSWORD}'
+#       VERTICA_HOST: "vertica"
+#       VERTICA_PORT: "5433"
+#       VERTICA_USER: "newdbadmin"
+#       VERTICA_PASSWORD: "vertica"
+#       VERTICA_DATABASE: "VMart"
+#       VERTICA_SSL: "false"
+#     command: [ "node", "index.js" ]
+#     restart: always
+#     healthcheck:
+#       test: wget --no-verbose --tries=1 --spider http://localhost:4242/health || exit 1
+#       interval: 1s
+#       timeout: 1m
+#       retries: 5
+#       start_period: 15s
+#     # depends_on:
+#     #   - vertica
+#     networks:
+#       - unleash_network
+#   # keycloak:
+#   #   container_name: local_keycloak
+#   #   environment:
+#   #     DB_VENDOR: postgres
+#   #     DB_ADDR: postgres_kk
+#   #     DB_DATABASE: keycloack_db
+#   #     DB_USER: keycloack
+#   #     DB_PASSWORD: "${DB_PASSWORD_KEYCLOAK}"
+#   #     KEYCLOAK_ADMIN: admin
+#   #     KEYCLOAK_ADMIN_PASSWORD: admin
+#   #     KEYCLOAK_FRONTEND_URL: https://keycloak.tolkachev.space/auth
+#   #   image: jboss/keycloak:latest
+#   #   ports:
+#   #     - "8080:8080"
+#   #   restart: always
+#   #   networks:
+#   #     - unleash_network
+#   pgadmin:
+#     container_name: local_pgadmin
+#     image: dockerhub.timeweb.cloud/dpage/pgadmin4:6
+#     environment:
+#       PGADMIN_DEFAULT_EMAIL: unleash@tolkachev.space
+#       PGADMIN_DEFAULT_PASSWORD: unleash
+#     ports:
+#       - "15432:80"
+#     volumes:
+#       - "pgadmin:/var/lib/pgadmin4"
+#     restart: always
+#     networks:
+#       - unleash_network
+#   postgres_unleash:
+#     image: dockerhub.timeweb.cloud/postgres:latest
+#     ports:
+#       - "6432:5432"
+#     environment:
+#       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD_UNLEASH}"
+#       POSTGRES_USER: unleash
+#       POSTGRES_DB: unleash_db
+#     volumes:
+#       - /root/unleash/data:/var/lib/postgresql/data
+#       - /root/unleash/backups:/backups
+#     networks:
+#       - unleash_network
+#   # postgres_kk:
+#   #   image: postgres:latest
+#   #   ports:
+#   #     - "5432:5432"
+#   #   environment:
+#   #     POSTGRES_PASSWORD: "${POSTGRES_PASSWORD_KEYCLOAK}"
+#   #     POSTGRES_USER: keycloack
+#   #     POSTGRES_DB: keycloack_db
+#   #   volumes:
+#   #     - /root/unleash/data-postgres_kk:/var/lib/postgresql/data
+#   #     - /root/unleash/backups:/backups
+#   #   networks:
+#   #     - unleash_network
+#   unleash-proxy:
+#     build:
+#       context: ./unleash-proxy
+#       dockerfile: Dockerfile
+#     environment:
+#       UNLEASH_PROXY_CLIENT_KEYS: "some-secret"
+#       UNLEASH_URL: "http://web:4242/api/"
+#       UNLEASH_API_TOKEN: "*:*.0a3c5726fa7640c1dc0de049ae9da7c247213f698590c0f844ebdd34"
+#       LOG_LEVEL: "debug"
+#       UNLEASH_NAME_PREFIX: "frontend-"
+#       TRUST_PROXY: "TRUE"
+#     ports:
+#       - "3000:3000"
+#     networks:
+#       - unleash_network
+#   demo-react-app:
+#     container_name: demo-react-app
+#     build:
+#       context: ./demo-react-app-proxy
+#       dockerfile: Dockerfile
+#     ports:
+#       - "3001:80"
+#     restart: always
+#   # vertica:
+#   #   container_name: local_vertica
+#   #   image: dockerhub.timeweb.cloud/vertica/vertica-ce:latest
+#   #   environment:
+#   #     APP_DB_USER: "newdbadmin"
+#   #     APP_DB_PASSWORD: "vertica"
+#   #     TZ: "Europe/Moscow"
+#   #   deploy:
+#   #     mode: global
+#   #   ports:
+#   #     - "5433:5433"
+#   #     - "5444:5444"
+#   #   volumes:
+#   #     - "/root/unleash/data-vertica:/data"
+#   #     - type: volume
+#   #       source: vertica-data2
+#   #       target: /data
+#   #   restart: always
+#   #   networks:
+#   #     - unleash_network
+
+# volumes:
+#   pgadmin:
+#   # vertica-data2:
+
+# networks:
+#   unleash_network:
+#     driver: bridge
