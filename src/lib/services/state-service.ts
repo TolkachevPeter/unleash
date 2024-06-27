@@ -256,14 +256,24 @@ export default class StateService {
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     async importFeatureEnvironments({ featureEnvironments }): Promise<void> {
+        const existingEnvironments =
+            await this.featureEnvironmentStore.getAll();
+
         await Promise.all(
-            featureEnvironments.map((env) =>
-                this.featureEnvironmentStore.addEnvironmentToFeature(
+            featureEnvironments.map(async (env) => {
+                const existingEnv = existingEnvironments.find(
+                    (e) =>
+                        e.featureName === env.featureName &&
+                        e.environment === env.environment,
+                );
+                const enabledState = existingEnv ? existingEnv.enabled : false; // Сохраняем текущее состояние или устанавливаем false для новых
+
+                await this.featureEnvironmentStore.addEnvironmentToFeature(
                     env.featureName,
                     env.environment,
-                    env.enabled,
-                ),
-            ),
+                    enabledState,
+                );
+            }),
         );
     }
 
@@ -657,6 +667,50 @@ export default class StateService {
                 this.segmentStore.addToStrategy(segmentId, featureStrategyId),
             ),
         );
+    }
+
+    async exportByDatesForDmz({
+        createdAfter,
+        createdBefore,
+    }: IExportIncludeOptions & {
+        createdAfter?: string;
+        createdBefore?: string;
+    }): Promise<{
+        version: number;
+        features: FeatureToggle[];
+        featureStrategies: IFeatureStrategy[];
+        featureEnvironments: IFeatureEnvironment[];
+    }> {
+        const features = await this.toggleStore.getAllByDates({
+            archived: false,
+            createdAfter,
+            createdBefore,
+        });
+
+        const filteredFeatures = features.filter((feature) =>
+            feature.name.toUpperCase().startsWith('DMZ-'),
+        );
+
+        const [allFeatureStrategies, allFeatureEnvironments] =
+            await Promise.all([
+                this.featureStrategiesStore.getAll(),
+                this.featureEnvironmentStore.getAll(),
+            ]);
+
+        const featureNamesSet = new Set(filteredFeatures.map((f) => f.name));
+        const filteredFeatureStrategies = allFeatureStrategies.filter((fS) =>
+            featureNamesSet.has(fS.featureName),
+        );
+        const filteredFeatureEnvironments = allFeatureEnvironments.filter(
+            (fE) => featureNamesSet.has(fE.featureName),
+        );
+
+        return {
+            version: 3,
+            features: filteredFeatures,
+            featureStrategies: filteredFeatureStrategies,
+            featureEnvironments: filteredFeatureEnvironments,
+        };
     }
 
     async exportByDates({
