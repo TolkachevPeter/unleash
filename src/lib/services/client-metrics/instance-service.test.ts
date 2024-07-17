@@ -42,6 +42,7 @@ test('Multiple registrations of same appname and instanceid within same time per
     jest.useFakeTimers();
     const appStoreSpy = jest.fn();
     const bulkSpy = jest.fn();
+    
     const clientApplicationsStore: any = {
         bulkUpsert: appStoreSpy,
     };
@@ -56,6 +57,7 @@ test('Multiple registrations of same appname and instanceid within same time per
             clientApplicationsStore,
             clientInstanceStore,
             eventStore: new FakeEventStore(),
+            featureStrategiesStore: null,
         },
         { getLogger },
     );
@@ -106,6 +108,7 @@ test('Multiple unique clients causes multiple registrations', async () => {
             clientApplicationsStore,
             clientInstanceStore,
             eventStore: new FakeEventStore(),
+            featureStrategiesStore: null,
         },
         { getLogger },
     );
@@ -159,6 +162,7 @@ test('Same client registered outside of dedup interval will be registered twice'
             clientApplicationsStore,
             clientInstanceStore,
             eventStore: new FakeEventStore(),
+            featureStrategiesStore: null,
         },
         { getLogger },
         bulkInterval,
@@ -212,6 +216,7 @@ test('No registrations during a time period will not call stores', async () => {
             clientApplicationsStore,
             clientInstanceStore,
             eventStore: new FakeEventStore(),
+            featureStrategiesStore: null,
         },
         { getLogger },
     );

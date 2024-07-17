@@ -181,13 +181,12 @@ export default class ClientInstanceService {
             this.featureToggleStore.getAll(),
         ]);
     
-        // Получаем подробную информацию для каждого toggle, видимого для приложения
         const seenTogglesDetails = await Promise.all(seenToggleNames.map(async (toggleName) => {
             try {
                 const featureDetails = await this.featureStrategiesStore.getFeatureToggleWithEnvs(toggleName);
                 return featureDetails;
             } catch (error) {
-                this.logger.error(`Error fetching details for toggle ${toggleName}:`, error);
+                // this.logger.error(`Error fetching details for toggle ${toggleName}:`, error);
                 return null;
             }
         }));
@@ -199,16 +198,18 @@ export default class ClientInstanceService {
                 const found = features.find((f) => f.name === name);
                 const featureDetails = seenTogglesDetails[index];
                 if (found && featureDetails) {
+                    const { environments, ...restDetails } = featureDetails;
                     return {
-                        ...found, 
-                        featureDetails
+                        ...found,
+                        featureDetails: { environments }
                     };
                 } else {
                     return { name, notFound: true };
                 }
             }),
         };
-    }    
+    }
+    
 
     async getApplication(appName: string): Promise<IApplication> {
         const [seenToggles, application, instances, strategies, features] =
