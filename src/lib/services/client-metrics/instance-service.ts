@@ -11,6 +11,7 @@ import {
 import { IFeatureToggleStore } from '../../types/stores/feature-toggle-store';
 import { IStrategyStore } from '../../types/stores/strategy-store';
 import { IClientInstanceStore } from '../../types/stores/client-instance-store';
+import { IFeatureStrategiesStore } from '../../types/stores/feature-strategies-store';
 import { IApplicationQuery } from '../../types/query';
 import { IClientApp } from '../../types/model';
 import { clientRegisterSchema } from './schema';
@@ -45,6 +46,8 @@ export default class ClientInstanceService {
 
     private announcementInterval: number;
 
+    private featureStrategiesStore: IFeatureStrategiesStore;
+
     constructor(
         {
             clientMetricsStoreV2,
@@ -53,6 +56,7 @@ export default class ClientInstanceService {
             clientInstanceStore,
             clientApplicationsStore,
             eventStore,
+            featureStrategiesStore
         }: Pick<
             IUnleashStores,
             | 'clientMetricsStoreV2'
@@ -61,6 +65,7 @@ export default class ClientInstanceService {
             | 'clientApplicationsStore'
             | 'clientInstanceStore'
             | 'eventStore'
+            | 'featureStrategiesStore'
         >,
         { getLogger }: Pick<IUnleashConfig, 'getLogger'>,
         bulkInterval = secondsToMilliseconds(5),
@@ -72,6 +77,7 @@ export default class ClientInstanceService {
         this.clientApplicationsStore = clientApplicationsStore;
         this.clientInstanceStore = clientInstanceStore;
         this.eventStore = eventStore;
+        this.featureStrategiesStore = featureStrategiesStore;
 
         this.logger = getLogger(
             '/services/client-metrics/client-instance-service.ts',
@@ -169,21 +175,40 @@ export default class ClientInstanceService {
     }
 
     async getApplicationForJira(appName: string): Promise<IApplication> {
-        const [seenToggles, application, features] = await Promise.all([
+        const [seenToggleNames, application, features] = await Promise.all([
             this.clientMetricsStoreV2.getSeenTogglesForApp(appName),
             this.clientApplicationsStore.get(appName),
             this.featureToggleStore.getAll(),
         ]);
-
+    
+        // Получаем подробную информацию для каждого toggle, видимого для приложения
+        const seenTogglesDetails = await Promise.all(seenToggleNames.map(async (toggleName) => {
+            try {
+                const featureDetails = await this.featureStrategiesStore.getFeatureToggleWithEnvs(toggleName);
+                return featureDetails;
+            } catch (error) {
+                this.logger.error(`Error fetching details for toggle ${toggleName}:`, error);
+                return null;
+            }
+        }));
+    
         return {
             appName: application.appName,
             createdAt: application.createdAt,
-            seenToggles: seenToggles.map((name) => {
+            seenToggles: seenToggleNames.map((name, index) => {
                 const found = features.find((f) => f.name === name);
-                return found || { name, notFound: true };
+                const featureDetails = seenTogglesDetails[index];
+                if (found && featureDetails) {
+                    return {
+                        ...found, 
+                        featureDetails
+                    };
+                } else {
+                    return { name, notFound: true };
+                }
             }),
         };
-    }
+    }    
 
     async getApplication(appName: string): Promise<IApplication> {
         const [seenToggles, application, instances, strategies, features] =
