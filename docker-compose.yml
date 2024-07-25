@@ -51,23 +51,6 @@ services:
       start_period: 15s
     networks:
       - unleash_network
-  # keycloak:
-  #   container_name: local_keycloak
-  #   environment:
-  #     DB_VENDOR: postgres
-  #     DB_ADDR: postgres_kk
-  #     DB_DATABASE: keycloack_db
-  #     DB_USER: keycloack
-  #     DB_PASSWORD: "${DB_PASSWORD_KEYCLOAK}"
-  #     KEYCLOAK_ADMIN: admin
-  #     KEYCLOAK_ADMIN_PASSWORD: admin
-  #     KEYCLOAK_FRONTEND_URL: https://keycloak.tolkachev.space/auth
-  #   image: jboss/keycloak:latest
-  #   ports:
-  #     - "8080:8080"
-  #   restart: always
-  #   networks:
-  #     - unleash_network
   pgadmin:
     container_name: local_pgadmin
     image: dpage/pgadmin4:6
@@ -81,19 +64,6 @@ services:
     restart: always
     networks:
       - unleash_network
-  # postgres_kk:
-  #   image: postgres:latest
-  #   ports:
-  #     - "5432:5432"
-  #   environment:
-  #     POSTGRES_PASSWORD: "${POSTGRES_PASSWORD_KEYCLOAK}"
-  #     POSTGRES_USER: keycloack
-  #     POSTGRES_DB: keycloack_db
-  #   volumes:
-  #     - /root/unleash/data-postgres_kk:/var/lib/postgresql/data
-  #     - /root/unleash/backups:/backups
-  #   networks:
-  #     - unleash_network
   unleash-proxy:
     build:
       context: ./unleash-proxy
@@ -142,15 +112,13 @@ services:
       - ./data2:/var/lib/postgresql/data
     networks:
       - unleash_network
-
+networks:
+  unleash_network:
+    driver: bridge
 volumes:
   pgadmin:
   data1:
   data2:
-
-networks:
-  unleash_network:
-    driver: bridge
 
 # version: "3.9"
 # services:
