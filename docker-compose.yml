@@ -58,19 +58,6 @@ services:
     restart: always
     networks:
       - unleash_network
-  postgres_unleash:
-    image: postgres:latest
-    ports:
-      - "6432:5432"
-    environment:
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD_UNLEASH}"
-      POSTGRES_USER: unleash
-      POSTGRES_DB: unleash_db
-    volumes:
-      - /root/unleash/data:/var/lib/postgresql/data
-      - /root/unleash/backups:/backups
-    networks:
-      - unleash_network
   # postgres_kk:
   #   image: postgres:latest
   #   ports:
@@ -107,9 +94,51 @@ services:
     ports:
       - "3001:80"
     restart: always
+  unleash2:
+    container_name: unleash2
+    image: petertolkachev/unleash_4.15.4:latest
+    ports:
+      - "4243:4242"
+    environment:
+      DATABASE_URL: postgresql://unleash2:password2@postgres_unleash2:6433/unleash_db2
+      DATABASE_SSL: "${DATABASE_SSL}"
+      LOG_LEVEL: "${LOG_LEVEL}"
+      INIT_FRONTEND_API_TOKENS: "${INIT_FRONTEND_API_TOKENS}"
+      INIT_CLIENT_API_TOKENS: "${INIT_CLIENT_API_TOKENS}"
+      UNLEASH_SIMPLE_STRING: "${UNLEASH_SIMPLE_STRING}"
+      ENABLE_REQUEST_LOGGER: "${ENABLE_REQUEST_LOGGER}"
+    networks:
+      - unleash_network
+  postgres_unleash:
+    image: postgres:latest
+    ports:
+      - "6432:5432"
+    environment:
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD_UNLEASH}"
+      POSTGRES_USER: unleash
+      POSTGRES_DB: unleash_db
+    volumes:
+      - /root/unleash/data:/var/lib/postgresql/data
+      - /root/unleash/backups:/backups
+    networks:
+      - unleash_network
+  postgres_unleash2:
+    image: postgres:latest
+    ports:
+      - "6433:5432"
+    environment:
+      POSTGRES_PASSWORD: password2
+      POSTGRES_USER: unleash2
+      POSTGRES_DB: unleash_db2
+    volumes:
+      - ./data2:/var/lib/postgresql/data
+    networks:
+      - unleash_network
 
 volumes:
   pgadmin:
+  data1:
+  data2:
 
 networks:
   unleash_network:
