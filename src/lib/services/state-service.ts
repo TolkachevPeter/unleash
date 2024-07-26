@@ -255,29 +255,128 @@ export default class StateService {
     }
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-    async importFeatureEnvironments({ featureEnvironments }): Promise<void> {
-        const existingEnvironments =
-            await this.featureEnvironmentStore.getAll();
+    // async importFeatureEnvironments({ featureEnvironments }): Promise<void> {
+    //     const existingEnvironments =
+    //         await this.featureEnvironmentStore.getAll();
 
-        await Promise.all(
-            featureEnvironments.map(async (env) => {
-                const existingEnv = existingEnvironments.find(
-                    (e) =>
-                        e.featureName === env.featureName &&
-                        e.environment === env.environment,
-                );
-                const enabledState = existingEnv ? existingEnv.enabled : false; // Сохраняем текущее состояние или устанавливаем false для новых
+    //     await Promise.all(
+    //         featureEnvironments.map(async (env) => {
+    //             const existingEnv = existingEnvironments.find(
+    //                 (e) =>
+    //                     e.featureName === env.featureName &&
+    //                     e.environment === env.environment,
+    //             );
+    //             const enabledState = existingEnv ? existingEnv.enabled : false; // Сохраняем текущее состояние или устанавливаем false для новых
 
-                await this.featureEnvironmentStore.addEnvironmentToFeature(
-                    env.featureName,
-                    env.environment,
-                    enabledState,
-                );
-            }),
-        );
-    }
+    //             await this.featureEnvironmentStore.addEnvironmentToFeature(
+    //                 env.featureName,
+    //                 env.environment,
+    //                 enabledState,
+    //             );
+    //         }),
+    //     );
+    // }
+
+        // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+        async importFeatureEnvironments({ featureEnvironments }): Promise<void> {
+            await Promise.all(
+                featureEnvironments.map((env) =>
+                    this.featureEnvironmentStore.addEnvironmentToFeature(
+                        env.featureName,
+                        env.environment,
+                        env.enabled,
+                    ),
+                ),
+            );
+        }
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    // async importFeatureEnvironments({ featureEnvironments }): Promise<void> {
+    //     const existingEnvironments =
+    //         await this.featureEnvironmentStore.getAll();
+    //     const allEnvironments = await this.environmentStore.getAll();
+
+    //     const activeEnvironments = allEnvironments.filter((env) => env.enabled);
+    //     const activeEnvironmentNames = activeEnvironments.map(
+    //         (env) => env.name,
+    //     );
+
+    //     const primaryEnvironment = activeEnvironmentNames.includes('production')
+    //         ? 'production'
+    //         : activeEnvironmentNames[0];
+
+    //     await Promise.all(
+    //         featureEnvironments.map(async (env) => {
+    //             const environmentToUse = activeEnvironmentNames.includes(
+    //                 env.environment,
+    //             )
+    //                 ? env.environment
+    //                 : primaryEnvironment;
+
+    //             const existingEnv = existingEnvironments.find(
+    //                 (e) =>
+    //                     e.featureName === env.featureName &&
+    //                     e.environment === environmentToUse,
+    //             );
+    //             const enabledState = existingEnv ? existingEnv.enabled : false;
+
+    //             await this.featureEnvironmentStore.addEnvironmentToFeature(
+    //                 env.featureName,
+    //                 environmentToUse,
+    //                 enabledState,
+    //             );
+    //         }),
+    //     );
+    // }
+
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    // async importFeatureStrategies({
+    //     featureStrategies,
+    //     dropBeforeImport,
+    //     keepExisting,
+    // }): Promise<void> {
+    //     const oldFeatureStrategies = dropBeforeImport
+    //         ? []
+    //         : await this.featureStrategiesStore.getAll();
+    //     if (dropBeforeImport) {
+    //         this.logger.info(
+    //             'Dropping existing strategies for feature toggles',
+    //         );
+    //         await this.featureStrategiesStore.deleteAll();
+    //     }
+
+    //     // Получаем список активных окружений
+    //     const allEnvironments = await this.environmentStore.getAll();
+    //     const activeEnvironments = allEnvironments.filter((env) => env.enabled);
+    //     const activeEnvironmentNames = activeEnvironments.map(
+    //         (env) => env.name,
+    //     );
+    //     const defaultEnvironment = activeEnvironmentNames.includes('production')
+    //         ? 'production'
+    //         : activeEnvironmentNames[0];
+
+    //     const strategiesToImport = keepExisting
+    //         ? featureStrategies.filter(
+    //               (s) => !oldFeatureStrategies.some((o) => o.id === s.id),
+    //           )
+    //         : featureStrategies;
+
+    //     await Promise.all(
+    //         strategiesToImport.map((featureStrategy) => {
+    //             // Проверяем и при необходимости заменяем окружение стратегии
+    //             const environmentToUse = activeEnvironmentNames.includes(
+    //                 featureStrategy.environment,
+    //             )
+    //                 ? featureStrategy.environment
+    //                 : defaultEnvironment;
+    //             return this.featureStrategiesStore.createStrategyFeatureEnv({
+    //                 ...featureStrategy,
+    //                 environment: environmentToUse,
+    //             });
+    //         }),
+    //     );
+    // }
+
     async importFeatureStrategies({
         featureStrategies,
         dropBeforeImport,
