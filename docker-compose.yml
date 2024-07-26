@@ -34,7 +34,7 @@ services:
     ports:
       - "4243:4242"
     environment:
-      DATABASE_URL: "postgresql://unleash2:password2@postgres_unleash2:6433/unleash_db2"
+      DATABASE_URL: "postgresql://unleash:${{ secrets.POSTGRES_PASSWORD_UNLEASH }}@postgres_unleash:5432/new_unleash_db"
       DATABASE_SSL: "${DATABASE_SSL}"
       LOG_LEVEL: "${LOG_LEVEL}"
       INIT_FRONTEND_API_TOKENS: "${INIT_FRONTEND_API_TOKENS}"
@@ -98,18 +98,6 @@ services:
     volumes:
       - /root/unleash/data:/var/lib/postgresql/data
       - /root/unleash/backups:/backups
-    networks:
-      - unleash_network
-  postgres_unleash2:
-    image: postgres:latest
-    ports:
-      - "6433:5432"
-    environment:
-      POSTGRES_PASSWORD: password2
-      POSTGRES_USER: unleash2
-      POSTGRES_DB: unleash_db2
-    volumes:
-      - ./data2:/var/lib/postgresql/data
     networks:
       - unleash_network
 networks:
