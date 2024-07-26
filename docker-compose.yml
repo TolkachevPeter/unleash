@@ -34,7 +34,7 @@ services:
     ports:
       - "4243:4242"
     environment:
-      DATABASE_URL: "postgresql://unleash:JuuYQW7iYJaJbm5@postgres_unleash:6432/new_unleash_db"
+      DATABASE_URL: "postgres://unleash:JuuYQW7iYJaJbm5@postgres_unleash/new_unleash_db"
       DATABASE_SSL: "${DATABASE_SSL}"
       LOG_LEVEL: "${LOG_LEVEL}"
       INIT_FRONTEND_API_TOKENS: "${INIT_FRONTEND_API_TOKENS}"
