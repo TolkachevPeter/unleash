@@ -162,11 +162,13 @@ export class ApiTokenController extends Controller {
     ): Promise<void> {
         const { user } = req;
         const tokens = await this.accessibleTokens(user);
+
+        const modifiedTokens = tokens.map(({ secret, ...restToken}) => restToken);
         this.openApiService.respondWithValidation(
             200,
             res,
             apiTokensSchema.$id,
-            { tokens: serializeDates(tokens) },
+            { tokens: process.env.SET_HIDDEN_TOKEN ? serializeDates(modifiedTokens) : serializeDates(tokens) },
         );
     }
 

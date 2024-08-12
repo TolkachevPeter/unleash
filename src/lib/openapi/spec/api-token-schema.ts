@@ -9,6 +9,7 @@ export const apiTokenSchema = {
     properties: {
         secret: {
             type: 'string',
+            nullable: true,
         },
         username: {
             type: 'string',
