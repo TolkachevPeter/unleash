@@ -18,6 +18,7 @@ services:
       EMAIL_SENDER: 'tolkachev@tolkachev.space'
       EMAIL_USER: '${EMAIL_USER}'
       EMAIL_PASSWORD: '${EMAIL_PASSWORD}'
+      SET_HIDDEN_TOKEN: "true"
     command: [ "node", "index.js" ]
     restart: always
     healthcheck:

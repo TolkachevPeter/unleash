@@ -189,11 +189,15 @@ export class ApiTokenController extends Controller {
     ): Promise<any> {
         const createToken = await createApiToken.validateAsync(req.body);
         const token = await this.apiTokenService.createApiToken(createToken);
+        const responseToken = {
+            ...serializeDates(token),
+            secret: "Токен отправлен на почту"
+        }
         this.openApiService.respondWithValidation(
             201,
             res,
             apiTokenSchema.$id,
-            serializeDates(token),
+            process.env.SET_HIDDEN_TOKEN ? responseToken :serializeDates(token),
         );
     }
 
