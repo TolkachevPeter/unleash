@@ -229,7 +229,7 @@ const COLUMNS = [
         disableGlobalFilter: true,
         Cell: (props: any) => (
             <ActionCell>
-                <CopyApiTokenButton token={props.row.original} />
+                {props.row.original.isCopyable && <CopyApiTokenButton token={props.row.original} />}
                 <RemoveApiTokenButton token={props.row.original} />
             </ActionCell>
         ),
