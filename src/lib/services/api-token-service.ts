@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import cron from 'cron';
 import { Logger } from '../logger';
 import { ADMIN, CLIENT, FRONTEND } from '../types/permissions';
 import { IUnleashStores } from '../types/stores';
@@ -22,6 +23,9 @@ import { IEnvironmentStore } from 'lib/types/stores/environment-store';
 import { constantTimeCompare } from '../util/constantTimeCompare';
 import { EmailService } from './email-service';
 import UserService from './user-service';
+import ProjectService from 'lib/services/project-service';
+import { GroupService } from './group-service';
+
 
 const resolveTokenPermissions = (tokenType: string) => {
     if (tokenType === ApiTokenType.ADMIN) {
@@ -54,6 +58,10 @@ export class ApiTokenService {
 
     private userService: UserService;
 
+    private projectService: ProjectService;
+
+    private groupService: GroupService;
+
     constructor(
         {
             apiTokenStore,
@@ -63,6 +71,8 @@ export class ApiTokenService {
         services: {
             emailService: EmailService;
             userService: UserService;
+            projectService: ProjectService;
+            groupService: GroupService;
         },
     ) {
         this.store = apiTokenStore;
@@ -75,11 +85,14 @@ export class ApiTokenService {
         ).unref();
         this.emailService = services.emailService;
         this.userService = services.userService;
+        this.projectService = services.projectService;
+        this.groupService = services.groupService;
         if (config.authentication.initApiTokens.length > 0) {
             process.nextTick(async () =>
                 this.initApiTokens(config.authentication.initApiTokens),
             );
         }
+        this.scheduleTokenExpirationReminders();
     }
 
     async fetchActiveTokens(): Promise<void> {
@@ -273,6 +286,74 @@ export class ApiTokenService {
             return `${projects[0]}:${environment}.${randomStr}`;
         }
     }
+
+    public scheduleTokenExpirationReminders(): void {
+        cron.schedule('0 0 * * *', async () => {
+            try {
+                const tokens = await this.getAllActiveTokens();
+                const currentDate = new Date();
+    
+                for (const token of tokens) {
+                    const daysLeft = Math.floor((new Date(token.expiresAt).getTime() - currentDate.getTime()) / (1000 * 3600 * 24));
+                    
+                    if ([30, 14, 7].includes(daysLeft)) {
+                        const user = await this.userService.getByUserName(token.username);
+    
+                        if (user && user.email) {
+                            const tokenSnippet = token.secret.slice(-6);
+    
+                            // const projectTeamEmails = await this.getProjectTeamEmails(token.projects);
+    
+                            // const ccEmails = [...projectTeamEmails, 'pierre.tolkachev@yandex.ru'];
+                            // для теста пока что так
+                            const ccEmails = ['pierre.tolkachev@yandex.ru'];
+    
+                            await this.emailService.sendTokenExpirationReminderMail(
+                                user.name,
+                                user.email,
+                                tokenSnippet,
+                                daysLeft,
+                                ccEmails
+                            );
+    
+                            this.logger.info(`Sent token expiration reminder to ${user.email} for token expiring in ${daysLeft} days, with CC: ${ccEmails.join(', ')}`);
+                        } else {
+                            this.logger.warn(`Could not send token expiration reminder, user ${token.username} has no email.`);
+                        }
+                    }
+                }
+    
+                this.logger.info('Token expiration reminders have been processed.');
+            } catch (error) {
+                this.logger.error('Failed to process token expiration reminders:', error);
+            }
+        });
+    }
+
+    private async getProjectTeamEmails(projects: string[]): Promise<string[]> {
+        const allEmails = new Set<string>();
+    
+        for (const projectId of projects) {
+            const accessWithRoles = await this.projectService.getAccessToProject(projectId);
+    
+            // получаем emails пользователей, имеющих доступ к проекту напрямую
+            const userEmails = accessWithRoles.users.map(user => user.email);
+    
+            // получаем email'ы пользователей, которые входят в группы, связанные с проектом
+            const groupUserEmailsPromises = accessWithRoles.groups.map(async group => {
+                const groupDetails = await this.groupService.getGroup(group.id);
+                return groupDetails.users.map(user => user.user.email);
+            });
+    
+            const groupUserEmails = (await Promise.all(groupUserEmailsPromises)).flat();
+    
+            userEmails.concat(groupUserEmails).forEach(email => allEmails.add(email));
+        }
+    
+        return Array.from(allEmails);
+    }
+     
+    
 
     destroy(): void {
         clearInterval(this.timer);

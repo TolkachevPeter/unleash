@@ -27,6 +27,7 @@ export interface IEmailEnvelope {
     subject: string;
     html: string;
     text: string;
+    cc?: string;
 }
 
 const RESET_MAIL_SUBJECT = 'Unleash - Reset your password';
@@ -246,6 +247,74 @@ export class EmailService {
             });
         });
     }
+
+    async sendTokenExpirationReminderMail(
+        name: string,
+        recipient: string,
+        personalToken: string,
+        daysUntilExpiration: number,
+        ccEmails: string[] = []
+    ): Promise<IEmailEnvelope> {
+        if (this.configured()) {
+            const year = new Date().getFullYear();
+            const bodyHtml = await this.compileTemplate(
+                'personal-token-refresh-reminder',
+                TemplateFormat.HTML,
+                {
+                    personalToken,
+                    name,
+                    year,
+                    daysUntilExpiration,
+                },
+            );
+            const bodyText = await this.compileTemplate(
+                'personal-token-refresh-reminder',
+                TemplateFormat.PLAIN,
+                {
+                    personalToken,
+                    name,
+                    year,
+                    daysUntilExpiration,
+                },
+            );
+            const email = {
+                from: this.sender,
+                to: recipient,
+                cc: ccEmails.join(', '),
+                subject: `Token Expiration Reminder - ${daysUntilExpiration} days left`,
+                html: bodyHtml,
+                text: bodyText,
+            };
+            process.nextTick(() => {
+                this.mailer.sendMail(email).then(
+                    () =>
+                        this.logger.info(
+                            `Successfully sent token expiration reminder email for ${daysUntilExpiration} days to ${recipient} with CC: ${ccEmails.join(', ')}`,
+                        ),
+                    (e) =>
+                        this.logger.warn(
+                            `Failed to send token expiration reminder email for ${daysUntilExpiration} days.`,
+                            e,
+                        ),
+                );
+            });
+            return Promise.resolve(email);
+        }
+        return new Promise((res) => {
+            this.logger.warn(
+                'No mailer is configured. Please read the docs on how to configure an emailservice',
+            );
+            res({
+                from: this.sender,
+                to: recipient,
+                cc: ccEmails.join(', '),
+                subject: `Token Expiration Reminder - ${daysUntilExpiration} days left`,
+                html: '',
+                text: '',
+            });
+        });
+    }
+       
 
     isEnabled(): boolean {
         return this.mailer !== undefined;
