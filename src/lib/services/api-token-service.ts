@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import cron from 'cron';
+import cron from 'node-cron';
 import { Logger } from '../logger';
 import { ADMIN, CLIENT, FRONTEND } from '../types/permissions';
 import { IUnleashStores } from '../types/stores';
