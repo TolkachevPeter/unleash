@@ -56,6 +56,8 @@ beforeAll(async () => {
     apiTokenService = new ApiTokenService(stores, config, {
         emailService,
         userService,
+        projectService,
+        groupService
     });
 });
 

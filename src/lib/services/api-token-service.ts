@@ -58,9 +58,9 @@ export class ApiTokenService {
 
     private userService: UserService;
 
-    private projectService: ProjectService;
+    private projectService?: ProjectService;
 
-    private groupService: GroupService;
+    private groupService?: GroupService;
 
     constructor(
         {

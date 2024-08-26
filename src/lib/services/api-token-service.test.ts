@@ -6,6 +6,8 @@ import FakeApiTokenStore from '../../test/fixtures/fake-api-token-store';
 import FakeEnvironmentStore from '../../test/fixtures/fake-environment-store';
 import UserService from './user-service';
 import { EmailService } from './email-service';
+import ProjectService from 'lib/services/project-service';
+import { GroupService } from './group-service';
 
 test('Should init api token', async () => {
     const token = {
@@ -25,6 +27,8 @@ test('Should init api token', async () => {
     const environmentStore = new FakeEnvironmentStore();
     const emailService = {} as EmailService;
     const userService = {} as UserService;
+    const projectService = {} as ProjectService;
+    const groupService = {} as GroupService;
     const insertCalled = new Promise((resolve) => {
         apiTokenStore.on('insert', resolve);
     });
@@ -32,6 +36,8 @@ test('Should init api token', async () => {
     new ApiTokenService({ apiTokenStore, environmentStore }, config, {
         emailService,
         userService,
+        projectService,
+        groupService
     });
 
     await insertCalled;
@@ -56,6 +62,8 @@ test("Shouldn't return frontend token when secret is undefined", async () => {
     const environmentStore = new FakeEnvironmentStore();
     const emailService = {} as EmailService;
     const userService = {} as UserService;
+    const projectService = {} as ProjectService;
+    const groupService = {} as GroupService;
 
     await environmentStore.create({
         name: 'default',
@@ -71,6 +79,8 @@ test("Shouldn't return frontend token when secret is undefined", async () => {
         {
             emailService,
             userService,
+            projectService,
+            groupService
         },
     );
 

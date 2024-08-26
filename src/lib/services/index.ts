@@ -63,10 +63,6 @@ export const createServices = (
         sessionService,
         settingService,
     });
-    const apiTokenService = new ApiTokenService(stores, config, {
-        emailService,
-        userService,
-    });
     const versionService = new VersionService(stores, config);
     const healthService = new HealthService(stores, config);
     const roleService = new RoleService(stores, config);
@@ -91,6 +87,12 @@ export const createServices = (
         featureToggleServiceV2,
         groupService,
     );
+    const apiTokenService = new ApiTokenService(stores, config, {
+        emailService,
+        userService,
+        projectService,
+        groupService
+    });
     const userSplashService = new UserSplashService(stores, config);
     const openApiService = new OpenApiService(config);
     const clientSpecService = new ClientSpecService(config);
