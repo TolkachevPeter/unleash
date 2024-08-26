@@ -291,10 +291,9 @@ export class ApiTokenService {
         cron.schedule('0 * * * *', async () => {
             try {
                 const tokens = await this.getAllActiveTokens();
-                const currentDate = new Date();
     
                 for (const token of tokens) {
-                    const daysLeft = Math.floor((new Date(token.expiresAt).getTime() - currentDate.getTime()) / (1000 * 3600 * 24));
+                    const daysLeft = Math.ceil((new Date(token.expiresAt).setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24));
                     
                     if ([30, 14, 7].includes(daysLeft)) {
                         const user = await this.userService.getByUserName(token.username);
