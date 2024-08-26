@@ -288,7 +288,7 @@ export class ApiTokenService {
     }
 
     public scheduleTokenExpirationReminders(): void {
-        cron.schedule('0 0 * * *', async () => {
+        cron.schedule('0 * * * *', async () => {
             try {
                 const tokens = await this.getAllActiveTokens();
                 const currentDate = new Date();
