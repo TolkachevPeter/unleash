@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import cron from 'node-cron';
+import { CronJob } from 'cron';
 import { Logger } from '../logger';
 import { ADMIN, CLIENT, FRONTEND } from '../types/permissions';
 import { IUnleashStores } from '../types/stores';
@@ -288,7 +288,7 @@ export class ApiTokenService {
     }
 
     public scheduleTokenExpirationReminders(): void {
-        cron.schedule('0 * * * *', async () => {
+        const job = new CronJob('0 * * * *', async () => {
             try {
                 const tokens = await this.getAllActiveTokens();
     
@@ -327,6 +327,7 @@ export class ApiTokenService {
                 this.logger.error('Failed to process token expiration reminders:', error);
             }
         });
+    job.start();
     }
 
     private async getProjectTeamEmails(projects: string[]): Promise<string[]> {
