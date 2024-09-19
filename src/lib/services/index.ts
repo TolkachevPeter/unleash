@@ -86,12 +86,13 @@ export const createServices = (
         accessService,
         featureToggleServiceV2,
         groupService,
+        emailService,
     );
     const apiTokenService = new ApiTokenService(stores, config, {
         emailService,
         userService,
         projectService,
-        groupService
+        groupService,
     });
     const userSplashService = new UserSplashService(stores, config);
     const openApiService = new OpenApiService(config);

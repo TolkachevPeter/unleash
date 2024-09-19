@@ -253,7 +253,7 @@ export class EmailService {
         recipient: string,
         personalToken: string,
         daysUntilExpiration: number,
-        ccEmails: string[] = []
+        ccEmails: string[] = [],
     ): Promise<IEmailEnvelope> {
         if (this.configured()) {
             const year = new Date().getFullYear();
@@ -289,7 +289,9 @@ export class EmailService {
                 this.mailer.sendMail(email).then(
                     () =>
                         this.logger.info(
-                            `Successfully sent token expiration reminder email for ${daysUntilExpiration} days to ${recipient} with CC: ${ccEmails.join(', ')}`,
+                            `Successfully sent token expiration reminder email for ${daysUntilExpiration} days to ${recipient} with CC: ${ccEmails.join(
+                                ', ',
+                            )}`,
                         ),
                     (e) =>
                         this.logger.warn(
@@ -314,7 +316,67 @@ export class EmailService {
             });
         });
     }
-       
+
+    async sendUnusedTogglesNotification(
+        recipientEmails: string,
+        content: string,
+    ): Promise<IEmailEnvelope> {
+        if (this.configured()) {
+            const bodyHtml = await this.compileTemplate(
+                'personal-token-refresh-reminder',
+                TemplateFormat.HTML,
+                {
+                    content,
+                },
+            );
+            const bodyText = await this.compileTemplate(
+                'personal-token-refresh-reminder',
+                TemplateFormat.PLAIN,
+                {
+                    content,
+                },
+            );
+            const subject = 'Unused Feature Toggles Notification';
+            const email = {
+                from: this.sender,
+                to: 'peter.tolkachev@gmail.com',
+                // to: recipientEmails,
+                // cc: ccEmails.join(', '),
+                // cc: 'pierre.tolkachev@yandex.ru',
+                subject,
+                html: bodyHtml,
+                text: bodyText,
+            };
+            process.nextTick(() => {
+                this.mailer.sendMail(email).then(
+                    () =>
+                        this.logger.info(
+                            `Successfully sent Unused Feature Toggles Notification email for ${recipientEmails}`,
+                        ),
+                    (e) =>
+                        this.logger.warn(
+                            `Failed to send Unused Feature Toggles Notification for ${recipientEmails} days.`,
+                            e,
+                        ),
+                );
+            });
+            return Promise.resolve(email);
+        }
+        return new Promise((res) => {
+            this.logger.warn(
+                'No mailer is configured. Please read the docs on how to configure an emailservice',
+            );
+            res({
+                from: this.sender,
+                // to: recipientEmails,
+                to: 'peter.tolkachev@gmail.com',
+                // cc: 'pierre.tolkachev@yandex.ru',
+                subject: `Unused Feature Toggles Notification`,
+                html: '',
+                text: '',
+            });
+        });
+    }
 
     isEnabled(): boolean {
         return this.mailer !== undefined;

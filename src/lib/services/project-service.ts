@@ -47,6 +47,9 @@ import { IUserStore } from 'lib/types/stores/user-store';
 import { arraysHaveSameItems } from '../util/arraysHaveSameItems';
 import { GroupService } from './group-service';
 import { IGroupModelWithProjectRole, IGroupRole } from 'lib/types/group';
+import { CronJob } from 'cron';
+import { subMonths, isBefore } from 'date-fns';
+import { EmailService } from './email-service';
 
 const getCreatedBy = (user: IUser) => user.email || user.username;
 
@@ -81,6 +84,8 @@ export default class ProjectService {
 
     private userStore: IUserStore;
 
+    private emailService: EmailService;
+
     constructor(
         {
             projectStore,
@@ -106,6 +111,7 @@ export default class ProjectService {
         accessService: AccessService,
         featureToggleService: FeatureToggleService,
         groupService: GroupService,
+        emailService: EmailService,
     ) {
         this.store = projectStore;
         this.environmentStore = environmentStore;
@@ -118,7 +124,151 @@ export default class ProjectService {
         this.tagStore = featureTagStore;
         this.userStore = userStore;
         this.groupService = groupService;
+        this.emailService = emailService;
         this.logger = config.getLogger('services/project-service.js');
+        this.scheduleUnusedToggleNotifications();
+    }
+
+    private scheduleUnusedToggleNotifications(): void {
+        const job = new CronJob(
+            '0 0 * * *',
+            async () => {
+                this.logger.info(
+                    'Running scheduled task: sendUnusedFeatureToggleNotifications',
+                );
+                await this.sendUnusedFeatureToggleNotifications();
+            },
+            null,
+            true,
+            'UTC',
+        );
+
+        job.start();
+    }
+
+    /**
+     * Sends notifications about unused feature toggles to project members.
+     */
+    public async sendUnusedFeatureToggleNotifications(): Promise<void> {
+        try {
+            // Step 1: Retrieve all non-archived projects
+            const projects = await this.store.getProjectsWithCounts();
+
+            for (const project of projects) {
+                const projectId = project.id;
+
+                // Step 2: Retrieve all feature toggles for the project
+                const toggles = await this.featureToggleStore.getAll({
+                    project: projectId,
+                    archived: false,
+                });
+
+                // Step 3: Filter toggles that have never been used
+                const unusedToggles = toggles.filter(
+                    (toggle) => !toggle.lastSeenAt,
+                );
+
+                // Step 4: Filter toggles older than two months
+                const twoMonthsAgo = subMonths(new Date(), 2);
+                const oldUnusedToggles = unusedToggles.filter((toggle) =>
+                    isBefore(new Date(toggle.createdAt), twoMonthsAgo),
+                );
+
+                if (oldUnusedToggles.length === 0) {
+                    continue; // No unused toggles for this project
+                }
+
+                // Step 5: Gather responsible members' emails
+                const memberEmails = await this.getProjectMemberEmails(
+                    projectId,
+                );
+
+                if (memberEmails.length === 0) {
+                    this.logger.warn(
+                        `No member emails found for project ${projectId}, skipping notification.`,
+                    );
+                    continue;
+                }
+
+                // Step 6: Generate email content
+                const emailContent =
+                    this.generateEmailContent(oldUnusedToggles);
+
+                // Step 7: Send email
+                await this.emailService.sendUnusedTogglesNotification(
+                    memberEmails,
+                    {
+                        toggles: oldUnusedToggles.map((toggle) => ({
+                            name: toggle.name,
+                        })),
+                        content: emailContent,
+                    },
+                );
+
+                this.logger.info(
+                    `Sent unused toggles notification for project ${projectId} to ${memberEmails.join(
+                        ', ',
+                    )}`,
+                );
+            }
+        } catch (error) {
+            this.logger.error(
+                'Failed to send unused feature toggle notifications:',
+                error,
+            );
+        }
+    }
+
+    /**
+     * Generates the content for the unused toggles notification email.
+     * @param toggles Array of unused FeatureToggle objects.
+     * @returns The content string for the email.
+     */
+    private generateEmailContent(toggles: FeatureToggle[]): string {
+        const toggleList = toggles
+            .map((toggle) => `- ${toggle.name}`)
+            .join('\n');
+        return `The following feature toggles have not been used and are older than two months:\n\n${toggleList}\n\nPlease consider reviewing or archiving these toggles.`;
+    }
+
+    /**
+     * Retrieves the email addresses of members responsible for a given project.
+     * @param projectId The ID of the project.
+     * @returns An array of email addresses.
+     */
+    private async getProjectMemberEmails(projectId: string): Promise<string[]> {
+        const allEmails = new Set<string>();
+
+        // Retrieve access information for the project
+        const accessWithRoles = await this.accessService.getProjectRoleAccess(
+            projectId,
+        );
+
+        // Iterate over each role and gather user and group emails
+        for (const role of accessWithRoles.roles) {
+            // Users directly assigned to roles
+            for (const user of accessWithRoles.users) {
+                if (user.roleId === role.id && user.email) {
+                    allEmails.add(user.email);
+                }
+            }
+
+            // Groups assigned to roles
+            for (const group of accessWithRoles.groups) {
+                if (group.roleId === role.id) {
+                    const groupDetails = await this.groupService.getGroup(
+                        group.id,
+                    );
+                    for (const groupUser of groupDetails.users) {
+                        if (groupUser.user.email) {
+                            allEmails.add(groupUser.user.email);
+                        }
+                    }
+                }
+            }
+        }
+
+        return Array.from(allEmails);
     }
 
     async getProjects(query?: IProjectQuery): Promise<IProjectWithCount[]> {
