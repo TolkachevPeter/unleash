@@ -72,7 +72,7 @@ services:
     environment:
       UNLEASH_PROXY_CLIENT_KEYS: "some-secret"
       UNLEASH_URL: "http://web:4242/api/"
-      UNLEASH_API_TOKEN: "*:*.0a3c5726fa7640c1dc0de049ae9da7c247213f698590c0f844ebdd34"
+      UNLEASH_API_TOKEN: "*:*.61225c0d65cfdaf446273f5a654b9af5c7c9e46409ca81219e772154"
       LOG_LEVEL: "debug"
       UNLEASH_NAME_PREFIX: "frontend-"
       TRUST_PROXY: "TRUE"
