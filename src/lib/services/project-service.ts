@@ -131,7 +131,7 @@ export default class ProjectService {
 
     private scheduleUnusedToggleNotifications(): void {
         const job = new CronJob(
-            '0 11 * * *',
+            '0 12 * * *',
             async () => {
                 this.logger.info(
                     'Running scheduled task: sendUnusedFeatureToggleNotifications',

@@ -323,14 +323,14 @@ export class EmailService {
     ): Promise<IEmailEnvelope> {
         if (this.configured()) {
             const bodyHtml = await this.compileTemplate(
-                'personal-token-refresh-reminder',
+                'toggle-refresh-reminder',
                 TemplateFormat.HTML,
                 {
                     content,
                 },
             );
             const bodyText = await this.compileTemplate(
-                'personal-token-refresh-reminder',
+                'toggle-refresh-reminder',
                 TemplateFormat.PLAIN,
                 {
                     content,
