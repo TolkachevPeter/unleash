@@ -49,6 +49,7 @@ beforeAll(async () => {
         accessService,
         featureToggleService,
         groupService,
+        emailService,
     );
 
     await projectService.createProject(project, user);
@@ -57,7 +58,7 @@ beforeAll(async () => {
         emailService,
         userService,
         projectService,
-        groupService
+        groupService,
     });
 });
 

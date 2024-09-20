@@ -20,6 +20,7 @@ let stores: IUnleashStores;
 let accessService;
 let groupService;
 let featureToggleService;
+let emailService;
 let projectService;
 let editorUser;
 let superUser;
@@ -225,6 +226,7 @@ beforeAll(async () => {
         accessService,
         featureToggleService,
         groupService,
+        emailService,
     );
 
     editorUser = await createUserEditorAccess('Bob Test', 'bob@getunleash.io');

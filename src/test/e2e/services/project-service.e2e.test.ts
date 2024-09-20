@@ -11,6 +11,7 @@ import EnvironmentService from '../../../lib/services/environment-service';
 import IncompatibleProjectError from '../../../lib/error/incompatible-project-error';
 import { SegmentService } from '../../../lib/services/segment-service';
 import { GroupService } from '../../../lib/services/group-service';
+import { EmailService } from 'lib/services/email-service';
 
 let stores;
 let db: ITestDb;
@@ -20,6 +21,7 @@ let groupService: GroupService;
 let accessService: AccessService;
 let environmentService: EnvironmentService;
 let featureToggleService: FeatureToggleService;
+let emailService: EmailService;
 let user;
 
 beforeAll(async () => {
@@ -48,6 +50,7 @@ beforeAll(async () => {
         accessService,
         featureToggleService,
         groupService,
+        emailService,
     );
 });
 

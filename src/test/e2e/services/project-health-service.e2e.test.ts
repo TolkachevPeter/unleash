@@ -17,6 +17,7 @@ let groupService;
 let accessService;
 let projectHealthService;
 let featureToggleService;
+let emailService;
 let user: IUser;
 
 beforeAll(async () => {
@@ -40,6 +41,7 @@ beforeAll(async () => {
         accessService,
         featureToggleService,
         groupService,
+        emailService,
     );
     projectHealthService = new ProjectHealthService(
         stores,

@@ -318,7 +318,7 @@ export class EmailService {
     }
 
     async sendUnusedTogglesNotification(
-        recipientEmails: string,
+        recipientEmails: string[],
         content: string,
     ): Promise<IEmailEnvelope> {
         if (this.configured()) {

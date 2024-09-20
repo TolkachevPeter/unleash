@@ -131,7 +131,7 @@ export default class ProjectService {
 
     private scheduleUnusedToggleNotifications(): void {
         const job = new CronJob(
-            '0 0 * * *',
+            '0 11 * * *',
             async () => {
                 this.logger.info(
                     'Running scheduled task: sendUnusedFeatureToggleNotifications',
@@ -140,121 +140,108 @@ export default class ProjectService {
             },
             null,
             true,
-            'UTC',
+            'Europe/Moscow',
         );
 
         job.start();
     }
 
-    /**
-     * Sends notifications about unused feature toggles to project members.
-     */
     public async sendUnusedFeatureToggleNotifications(): Promise<void> {
         try {
-            // Step 1: Retrieve all non-archived projects
-            const projects = await this.store.getProjectsWithCounts();
+            const allToggles = await this.featureToggleStore.getAll({
+                archived: false,
+            });
 
-            for (const project of projects) {
-                const projectId = project.id;
+            const unusedToggles = allToggles.filter(
+                (toggle) => !toggle.lastSeenAt,
+            );
 
-                // Step 2: Retrieve all feature toggles for the project
-                const toggles = await this.featureToggleStore.getAll({
-                    project: projectId,
-                    archived: false,
-                });
+            const twoMonthsAgo = subMonths(new Date(), 2);
+            const oldUnusedToggles = unusedToggles.filter((toggle) =>
+                isBefore(new Date(toggle.createdAt), twoMonthsAgo),
+            );
 
-                // Step 3: Filter toggles that have never been used
-                const unusedToggles = toggles.filter(
-                    (toggle) => !toggle.lastSeenAt,
-                );
-
-                // Step 4: Filter toggles older than two months
-                const twoMonthsAgo = subMonths(new Date(), 2);
-                const oldUnusedToggles = unusedToggles.filter((toggle) =>
-                    isBefore(new Date(toggle.createdAt), twoMonthsAgo),
-                );
-
-                if (oldUnusedToggles.length === 0) {
-                    continue; // No unused toggles for this project
+            const togglesByProject = oldUnusedToggles.reduce((acc, toggle) => {
+                if (!acc[toggle.project]) {
+                    acc[toggle.project] = [];
                 }
+                acc[toggle.project].push(toggle);
+                return acc;
+            }, {} as Record<string, FeatureToggle[]>);
 
-                // Step 5: Gather responsible members' emails
-                const memberEmails = await this.getProjectMemberEmails(
-                    projectId,
-                );
+            for (const [projectId, toggles] of Object.entries(
+                togglesByProject,
+            )) {
+                const teamEmails = await this.getProjectMemberEmails(projectId);
 
-                if (memberEmails.length === 0) {
-                    this.logger.warn(
-                        `No member emails found for project ${projectId}, skipping notification.`,
+                if (teamEmails.length > 0) {
+                    const emailContent = this.generateEmailContent(
+                        toggles,
+                        teamEmails,
                     );
-                    continue;
+
+                    await this.emailService.sendUnusedTogglesNotification(
+                        teamEmails,
+                        emailContent,
+                    );
+
+                    this.logger.info(
+                        `Отправлено уведомление о неиспользуемых toggles для проекта ${projectId} на адреса: ${teamEmails.join(
+                            ', ',
+                        )}`,
+                    );
+                } else {
+                    this.logger.warn(
+                        `Не найдено email-адресов участников для проекта ${projectId}, пропуск уведомления.`,
+                    );
                 }
-
-                // Step 6: Generate email content
-                const emailContent =
-                    this.generateEmailContent(oldUnusedToggles);
-
-                // Step 7: Send email
-                await this.emailService.sendUnusedTogglesNotification(
-                    memberEmails,
-                    {
-                        toggles: oldUnusedToggles.map((toggle) => ({
-                            name: toggle.name,
-                        })),
-                        content: emailContent,
-                    },
-                );
-
-                this.logger.info(
-                    `Sent unused toggles notification for project ${projectId} to ${memberEmails.join(
-                        ', ',
-                    )}`,
-                );
             }
         } catch (error) {
             this.logger.error(
-                'Failed to send unused feature toggle notifications:',
+                'Не удалось отправить уведомления о неиспользуемых feature toggles:',
                 error,
             );
         }
     }
 
-    /**
-     * Generates the content for the unused toggles notification email.
-     * @param toggles Array of unused FeatureToggle objects.
-     * @returns The content string for the email.
-     */
-    private generateEmailContent(toggles: FeatureToggle[]): string {
-        const toggleList = toggles
+    private generateEmailContent(
+        toggles: FeatureToggle[],
+        teamEmails: string[],
+    ): string {
+        const toggleListText = toggles
             .map((toggle) => `- ${toggle.name}`)
             .join('\n');
-        return `The following feature toggles have not been used and are older than two months:\n\n${toggleList}\n\nPlease consider reviewing or archiving these toggles.`;
+
+        const textContent = `
+Hello,
+
+The following feature toggles have not been used and are older than two months:
+
+${toggleListText}
+
+Please consider reviewing or archiving these toggles.
+
+Sent with teamEmails: ${teamEmails}
+
+    `;
+
+        return textContent;
     }
 
-    /**
-     * Retrieves the email addresses of members responsible for a given project.
-     * @param projectId The ID of the project.
-     * @returns An array of email addresses.
-     */
     private async getProjectMemberEmails(projectId: string): Promise<string[]> {
         const allEmails = new Set<string>();
 
-        // Retrieve access information for the project
-        const accessWithRoles = await this.accessService.getProjectRoleAccess(
-            projectId,
-        );
+        const [roles, usersWithRoles, groupsWithRoles] =
+            await this.accessService.getProjectRoleAccess(projectId);
 
-        // Iterate over each role and gather user and group emails
-        for (const role of accessWithRoles.roles) {
-            // Users directly assigned to roles
-            for (const user of accessWithRoles.users) {
+        for (const role of roles) {
+            for (const user of usersWithRoles) {
                 if (user.roleId === role.id && user.email) {
                     allEmails.add(user.email);
                 }
             }
 
-            // Groups assigned to roles
-            for (const group of accessWithRoles.groups) {
+            for (const group of groupsWithRoles) {
                 if (group.roleId === role.id) {
                     const groupDetails = await this.groupService.getGroup(
                         group.id,
