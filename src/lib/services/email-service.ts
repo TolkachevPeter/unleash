@@ -400,6 +400,8 @@ export class EmailService {
                     textContent,
                 },
             );
+            console.log('htmlContent', htmlContent);
+            console.log('textContent', textContent);
             const email = {
                 from: this.sender,
                 to: 'peter.tolkachev@gmail.com',
