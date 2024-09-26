@@ -48,7 +48,7 @@ import { arraysHaveSameItems } from '../util/arraysHaveSameItems';
 import { GroupService } from './group-service';
 import { IGroupModelWithProjectRole, IGroupRole } from 'lib/types/group';
 import { CronJob } from 'cron';
-import { subMonths, isBefore } from 'date-fns';
+import { subMonths, isBefore, subWeeks } from 'date-fns';
 import { EmailService } from './email-service';
 
 const getCreatedBy = (user: IUser) => user.email || user.username;
@@ -127,6 +127,162 @@ export default class ProjectService {
         this.emailService = emailService;
         this.logger = config.getLogger('services/project-service.js');
         this.scheduleUnusedToggleNotifications();
+        if (
+            process.env.CHECK_OLD_ENABLED_TOGGLES === 'true' ||
+            process.env.CHECK_OLD_ENABLED_TOGGLES === 'TRUE'
+        ) {
+            this.scheduleOldEnabledToggleNotifications();
+        }
+    }
+
+    private scheduleOldEnabledToggleNotifications(): void {
+        // const job = new CronJob('0 9 * * 1,3', async () => {
+        const job = new CronJob('0 * * * *', async () => {
+            await this.sendOldEnabledFeatureToggleNotifications();
+        });
+        job.start();
+        this.logger.info(
+            'Scheduled old enabled toggles notifications (Mon, Wed at 09:00).',
+        );
+    }
+
+    public async sendOldEnabledFeatureToggleNotifications(): Promise<void> {
+        try {
+            const allToggles = await this.featureToggleStore.getAll({
+                archived: false,
+            });
+
+            const releaseToggles = allToggles.filter(
+                (toggle) => toggle.type === 'release',
+            );
+
+            const twoWeeksAgo = subWeeks(new Date(), 2);
+
+            const oldEnabledToggles: FeatureToggle[] = [];
+
+            for (const toggle of releaseToggles) {
+                const lastEnabledAt = toggle.lastEnabledAt;
+
+                if (
+                    lastEnabledAt &&
+                    isBefore(new Date(lastEnabledAt), twoWeeksAgo)
+                ) {
+                    try {
+                        const envInfo =
+                            await this.featureToggleService.getEnvironmentInfo(
+                                toggle.project,
+                                'production',
+                                toggle.name,
+                            );
+
+                        if (envInfo.enabled) {
+                            oldEnabledToggles.push(toggle);
+                        }
+                    } catch (error) {
+                        this.logger.warn(
+                            `Не удалось получить информацию об окружении 'production' для тоггла ${toggle.name}:`,
+                            error,
+                        );
+                    }
+                }
+            }
+
+            const togglesByProject = oldEnabledToggles.reduce((acc, toggle) => {
+                if (!acc[toggle.project]) {
+                    acc[toggle.project] = [];
+                }
+                acc[toggle.project].push(toggle);
+                return acc;
+            }, {} as Record<string, FeatureToggle[]>);
+
+            for (const [projectId, toggles] of Object.entries(
+                togglesByProject,
+            )) {
+                const teamEmails = await this.getProjectMemberEmails(projectId);
+
+                if (teamEmails.length > 0) {
+                    const emailContent =
+                        this.generateEmailContentForRealiseOldToggles(
+                            toggles,
+                            projectId,
+                        );
+
+                    const ccEmails = 'peter.tolkachev@tolkachev.ru';
+
+                    await this.emailService.sendOldEnabledTogglesNotification(
+                        teamEmails,
+                        ccEmails,
+                        emailContent.subject,
+                        emailContent.html,
+                        emailContent.text,
+                    );
+
+                    this.logger.info(
+                        `Отправлено уведомление о старых включенных toggles для проекта ${projectId} на адреса: ${teamEmails.join(
+                            ', ',
+                        )}`,
+                    );
+                } else {
+                    this.logger.warn(
+                        `Не найдено email-адресов участников для проекта ${projectId}, пропуск уведомления.`,
+                    );
+                }
+            }
+        } catch (error) {
+            this.logger.error(
+                'Не удалось отправить уведомления о старых включенных feature toggles:',
+                error,
+            );
+        }
+    }
+
+    private generateEmailContentForRealiseOldToggles(
+        toggles: FeatureToggle[],
+        projectId: string,
+    ): {
+        subject: string;
+        html: string;
+        text: string;
+    } {
+        const toggleListHtml = toggles
+            .map((toggle) => `<li>${toggle.name}</li>`)
+            .join('');
+        const toggleListText = toggles
+            .map((toggle) => `- ${toggle.name}`)
+            .join('\n');
+
+        const projectName = toggles[0]?.project || projectId;
+
+        const subject = `Unleash. Old enabled feature-toggles of "${projectName}"`;
+
+        const htmlContent = `
+            <p>Добрый день.</p>
+            <p>Перечисленные в данном письме фича-тоглы были включены в Проде более двух недель назад:</p>
+            <ul>
+                ${toggleListHtml}
+            </ul>
+            <p>Рекомендуется начать работы по удалению данных фича-тоглов из кода и из Unleash.</p>
+            <p>Если удаление по каким-то причинам еще не может быть выполнено, просьба сообщить об этих причинах в ответном письме на группу <a href="mailto:peter.tolkachev@gmail.com">peter.tolkachev@gmail.com</a>.</p>
+        `;
+
+        const textContent = `
+Добрый день.
+
+Перечисленные в данном письме фича-тоглы были включены в Проде более двух недель назад:
+
+${toggleListText}
+
+Рекомендуется начать работы по удалению данных фича-тоглов из кода и из Unleash.
+
+Если удаление по каким-то причинам еще не может быть выполнено, просьба сообщить об этих причинах в ответном письме на группу peter.tolkachev@gmail.com.
+
+        `;
+
+        return {
+            subject,
+            html: htmlContent,
+            text: textContent,
+        };
     }
 
     private scheduleUnusedToggleNotifications(): void {

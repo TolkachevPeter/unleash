@@ -378,6 +378,71 @@ export class EmailService {
         });
     }
 
+    async sendOldEnabledTogglesNotification(
+        recipientEmails: string[],
+        ccEmails: string,
+        subject: string,
+        htmlContent: string,
+        textContent: string,
+    ): Promise<IEmailEnvelope> {
+        if (this.configured()) {
+            const bodyHtml = await this.compileTemplate(
+                'toggle-refresh-reminder',
+                TemplateFormat.HTML,
+                {
+                    htmlContent,
+                },
+            );
+            const bodyText = await this.compileTemplate(
+                'toggle-refresh-reminder',
+                TemplateFormat.PLAIN,
+                {
+                    textContent,
+                },
+            );
+            const email = {
+                from: this.sender,
+                to: 'peter.tolkachev@gmail.com',
+                // to: recipientEmails.join(','),
+                cc: ccEmails,
+                subject,
+                html: bodyHtml,
+                text: bodyText,
+            };
+            process.nextTick(() => {
+                this.mailer
+                    .sendMail(email)
+                    .then(() =>
+                        this.logger.info(
+                            `Успешно отправлено уведомление о старых включенных toggles на адреса: ${recipientEmails.join(
+                                ', ',
+                            )}`,
+                            (e) =>
+                                this.logger.warn(
+                                    `Не удалось отправить уведомление о старых включенных toggles.`,
+                                    e,
+                                ),
+                        ),
+                    );
+            });
+            return Promise.resolve(email);
+        }
+        return new Promise((res) => {
+            this.logger.warn(
+                'No mailer is configured. Please read the docs on how to configure an emailservice',
+            );
+            res({
+                from: this.sender,
+                // to: recipientEmails.join(','),
+                to: 'peter.tolkachev@gmail.com',
+                cc: ccEmails,
+                subject,
+                html: '',
+                text: '',
+            });
+        });
+    }
+
     isEnabled(): boolean {
         return this.mailer !== undefined;
     }
