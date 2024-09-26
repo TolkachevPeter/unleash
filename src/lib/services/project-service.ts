@@ -137,9 +137,12 @@ export default class ProjectService {
 
     private scheduleOldEnabledToggleNotifications(): void {
         // const job = new CronJob('0 9 * * 1,3', async () => {
-        const job = new CronJob('0 * * * *', async () => {
-            await this.sendOldEnabledFeatureToggleNotifications();
-        });
+        const job = new CronJob(
+            process.env.CRON_OLD_ENABLED_TOGGLES || '30 * * * *',
+            async () => {
+                await this.sendOldEnabledFeatureToggleNotifications();
+            },
+        );
         job.start();
         this.logger.info(
             'Scheduled old enabled toggles notifications (Mon, Wed at 09:00).',

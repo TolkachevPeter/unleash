@@ -410,20 +410,19 @@ export class EmailService {
                 text: bodyText,
             };
             process.nextTick(() => {
-                this.mailer
-                    .sendMail(email)
-                    .then(() =>
+                this.mailer.sendMail(email).then(
+                    () =>
                         this.logger.info(
                             `Успешно отправлено уведомление о старых включенных toggles на адреса: ${recipientEmails.join(
                                 ', ',
                             )}`,
-                            (e) =>
-                                this.logger.warn(
-                                    `Не удалось отправить уведомление о старых включенных toggles.`,
-                                    e,
-                                ),
                         ),
-                    );
+                    (e) =>
+                        this.logger.warn(
+                            `Не удалось отправить уведомление о старых включенных toggles.`,
+                            e,
+                        ),
+                );
             });
             return Promise.resolve(email);
         }
