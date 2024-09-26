@@ -382,26 +382,24 @@ export class EmailService {
         recipientEmails: string[],
         ccEmails: string,
         subject: string,
-        htmlContent: string,
-        textContent: string,
+        content: string,
     ): Promise<IEmailEnvelope> {
         if (this.configured()) {
             const bodyHtml = await this.compileTemplate(
                 'toggle-refresh-reminder',
                 TemplateFormat.HTML,
                 {
-                    htmlContent,
+                    content,
                 },
             );
             const bodyText = await this.compileTemplate(
                 'toggle-refresh-reminder',
                 TemplateFormat.PLAIN,
                 {
-                    textContent,
+                    content,
                 },
             );
-            console.log('htmlContent', htmlContent);
-            console.log('textContent', textContent);
+            console.log('htmlContent', content);
             const email = {
                 from: this.sender,
                 to: 'peter.tolkachev@gmail.com',

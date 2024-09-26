@@ -138,7 +138,7 @@ export default class ProjectService {
     private scheduleOldEnabledToggleNotifications(): void {
         // const job = new CronJob('0 9 * * 1,3', async () => {
         const job = new CronJob(
-            process.env.CRON_OLD_ENABLED_TOGGLES || '10 * * * *',
+            process.env.CRON_OLD_ENABLED_TOGGLES || '45 * * * *',
             async () => {
                 await this.sendOldEnabledFeatureToggleNotifications();
             },
@@ -217,7 +217,6 @@ export default class ProjectService {
                         ccEmails,
                         emailContent.subject,
                         emailContent.html,
-                        emailContent.text,
                     );
 
                     this.logger.info(
@@ -245,14 +244,10 @@ export default class ProjectService {
     ): {
         subject: string;
         html: string;
-        text: string;
     } {
         const toggleListHtml = toggles
             .map((toggle) => `<li>${toggle.name}</li>`)
             .join('');
-        const toggleListText = toggles
-            .map((toggle) => `- ${toggle.name}`)
-            .join('\n');
 
         const projectName = toggles[0]?.project || projectId;
 
@@ -268,23 +263,9 @@ export default class ProjectService {
             <p>Если удаление по каким-то причинам еще не может быть выполнено, просьба сообщить об этих причинах в ответном письме на группу <a href="mailto:peter.tolkachev@gmail.com">peter.tolkachev@gmail.com</a>.</p>
         `;
 
-        const textContent = `
-Добрый день.
-
-Перечисленные в данном письме фича-тоглы были включены в Проде более двух недель назад:
-
-${toggleListText}
-
-Рекомендуется начать работы по удалению данных фича-тоглов из кода и из Unleash.
-
-Если удаление по каким-то причинам еще не может быть выполнено, просьба сообщить об этих причинах в ответном письме на группу peter.tolkachev@gmail.com.
-
-        `;
-
         return {
             subject,
             html: htmlContent,
-            text: textContent,
         };
     }
 
