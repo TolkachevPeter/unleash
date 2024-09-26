@@ -138,7 +138,7 @@ export default class ProjectService {
     private scheduleOldEnabledToggleNotifications(): void {
         // const job = new CronJob('0 9 * * 1,3', async () => {
         const job = new CronJob(
-            process.env.CRON_OLD_ENABLED_TOGGLES || '30 * * * *',
+            process.env.CRON_OLD_ENABLED_TOGGLES || '10 * * * *',
             async () => {
                 await this.sendOldEnabledFeatureToggleNotifications();
             },
