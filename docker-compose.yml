@@ -93,6 +93,7 @@ services:
     image: postgres:latest
     ports:
       - "6432:5432"
+    restart: always
     environment:
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD_UNLEASH}"
       POSTGRES_USER: unleash
