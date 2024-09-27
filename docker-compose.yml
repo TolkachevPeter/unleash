@@ -30,29 +30,29 @@ services:
       start_period: 15s
     networks:
       - unleash_network
-  unleash2:
-    container_name: unleash2
-    image: petertolkachev/unleash_4.15.4:latest
-    ports:
-      - "4243:4242"
-    environment:
-      DATABASE_URL: "postgres://unleash:JuuYQW7iYJaJbm5@postgres_unleash/new_unleash_db"
-      DATABASE_SSL: "${DATABASE_SSL}"
-      LOG_LEVEL: "${LOG_LEVEL}"
-      INIT_FRONTEND_API_TOKENS: "${INIT_FRONTEND_API_TOKENS}"
-      INIT_CLIENT_API_TOKENS: "${INIT_CLIENT_API_TOKENS}"
-      UNLEASH_SIMPLE_STRING: "${UNLEASH_SIMPLE_STRING}"
-      ENABLE_REQUEST_LOGGER: "${ENABLE_REQUEST_LOGGER}"
-    command: [ "node", "index.js" ]
-    restart: always
-    healthcheck:
-      test: wget --no-verbose --tries=1 --spider http://localhost:4243/health || exit 1
-      interval: 1s
-      timeout: 1m
-      retries: 5
-      start_period: 15s
-    networks:
-      - unleash_network
+  # unleash2:
+  #   container_name: unleash2
+  #   image: petertolkachev/unleash_4.15.4:latest
+  #   ports:
+  #     - "4243:4242"
+  #   environment:
+  #     DATABASE_URL: "postgres://unleash:JuuYQW7iYJaJbm5@postgres_unleash/new_unleash_db"
+  #     DATABASE_SSL: "${DATABASE_SSL}"
+  #     LOG_LEVEL: "${LOG_LEVEL}"
+  #     INIT_FRONTEND_API_TOKENS: "${INIT_FRONTEND_API_TOKENS}"
+  #     INIT_CLIENT_API_TOKENS: "${INIT_CLIENT_API_TOKENS}"
+  #     UNLEASH_SIMPLE_STRING: "${UNLEASH_SIMPLE_STRING}"
+  #     ENABLE_REQUEST_LOGGER: "${ENABLE_REQUEST_LOGGER}"
+  #   command: [ "node", "index.js" ]
+  #   restart: always
+  #   healthcheck:
+  #     test: wget --no-verbose --tries=1 --spider http://localhost:4243/health || exit 1
+  #     interval: 1s
+  #     timeout: 1m
+  #     retries: 5
+  #     start_period: 15s
+  #   networks:
+  #     - unleash_network
   pgadmin:
     container_name: local_pgadmin
     image: dpage/pgadmin4:6
