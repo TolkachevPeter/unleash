@@ -87,10 +87,10 @@ export class Unleash extends EventEmitter {
             }
         });
 
-        if (!skipInstanceCountWarning && Unleash.instanceCount > 50) {
+        if (!skipInstanceCountWarning && Unleash.instanceCount > 2) {
             process.nextTick(() => {
                 const error = new Error(
-                    'The unleash SDK has been initialized more than 10 times',
+                    'The unleash SDK has been initialized more than 2 times',
                 );
                 this.emit(UnleashEvents.Error, error);
             });
