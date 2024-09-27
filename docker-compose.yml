@@ -19,7 +19,7 @@ services:
       EMAIL_USER: '${EMAIL_USER}'
       EMAIL_PASSWORD: '${EMAIL_PASSWORD}'
       SET_HIDDEN_TOKEN: "true"
-      CHECK_OLD_ENABLED_TOGGLES: "true"
+      # CHECK_OLD_ENABLED_TOGGLES: "true"
     command: [ "node", "index.js" ]
     restart: always
     healthcheck:
