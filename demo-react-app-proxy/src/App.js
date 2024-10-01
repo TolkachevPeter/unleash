@@ -73,7 +73,7 @@ function App({ appName, onAppNameChange }) {
       </div>
       {error && <div className="error-message">{error}</div>}
       <div className="input-group">
-      <p1>Toggle Name: </p1>
+        <p1>Toggle Name: </p1>
         <input
           type="text"
           value={toggleName}

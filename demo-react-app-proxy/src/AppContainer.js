@@ -1,28 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FlagProvider } from '@unleash/proxy-client-react';
 import App from './App';
+import { generateAppNames } from './utils'; // Импортируем функцию генерации appNames
 
 function AppContainer() {
-  const [appName, setAppName] = useState('your-app-frontend-app');
-  const [key, setKey] = useState(0);
+  const [appNames, setAppNames] = useState([]);
 
-  const handleAppNameChange = (newAppName) => {
-    setAppName(newAppName);
-    setKey(k => k + 1);
-  };
+  useEffect(() => {
+    const generatedAppNames = generateAppNames(1000);
+    setAppNames(generatedAppNames);
+  }, []);
 
-  const config = {
-    url: 'https://proxy.tolkachev.space/proxy/',
-    // url: 'http://localhost:3000/proxy/',
-    clientKey: 'some-secret',
-    refreshInterval: 15,
-    appName
+  const handleAppNameChange = (oldAppName, newAppName) => {
+    setAppNames((prevAppNames) =>
+      prevAppNames.map((name) => (name === oldAppName ? newAppName : name))
+    );
   };
 
   return (
-    <FlagProvider config={config} key={key}>
-      <App appName={appName} onAppNameChange={handleAppNameChange} />
-    </FlagProvider>
+    <div>
+      <h1>Тестирование Unleash Proxy с 1000 уникальных appName</h1>
+      <div className="app-list" style={{ height: '80vh', overflowY: 'scroll' }}>
+        {appNames.map((appName, index) => (
+          <FlagProvider
+            key={appName}
+            config={{
+              url: 'https://proxy.tolkachev.space/proxy/',
+              clientKey: 'some-secret',
+              refreshInterval: 15,
+              appName,
+            }}
+          >
+            <App
+              appName={appName}
+              onAppNameChange={(newAppName) => handleAppNameChange(appName, newAppName)}
+            />
+          </FlagProvider>
+        ))}
+      </div>
+    </div>
   );
 }
 
