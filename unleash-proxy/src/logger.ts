@@ -24,21 +24,41 @@ const resolve = (logLevel: LogLevel) => {
     return w || -1;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const stripEmptyArray = (arr: any[]) => {
-    if (!arr || arr.length === 0) {
-        return '';
+const extractErrorDetails = (err: any) => {
+    if (err instanceof Error) {
+        return {
+            message: err.message,
+            stack: err.stack,
+            name: err.name,
+        };
     }
-    return arr;
+    return err;
 };
 
 function formatMessage(message: any, args: any[]): string {
-    const completeMessage = [message, ...args]
-        .map((arg) =>
-            typeof arg === 'object' && arg !== null ? JSON.stringify(arg) : arg,
-        )
-        .join(' ');
-    return completeMessage.replace(/\r?\n|\r/g, ' ');
+    let formattedMessage = '';
+
+    if (message instanceof Error) {
+        formattedMessage += `Error: ${message.message}\nStack: ${message.stack}\n`;
+    } else if (typeof message === 'object' && message !== null) {
+        formattedMessage += `${JSON.stringify(message)} `;
+    } else {
+        formattedMessage += `${message} `;
+    }
+
+    if (args && args.length > 0) {
+        args.forEach((arg) => {
+            if (arg instanceof Error) {
+                formattedMessage += `Error: ${arg.message}\nStack: ${arg.stack}\n`;
+            } else if (typeof arg === 'object' && arg !== null) {
+                formattedMessage += `${JSON.stringify(arg)} `;
+            } else {
+                formattedMessage += `${arg} `;
+            }
+        });
+    }
+
+    return formattedMessage.trim().replace(/\r?\n|\r/g, ' ');
 }
 
 export interface Logger {
@@ -59,7 +79,7 @@ export class SimpleLogger implements Logger {
         this.useJson = useJson;
     }
 
-    shouldLog(desired: LogLevel) {
+    private shouldLog(desired: LogLevel): boolean {
         return resolve(desired) >= resolve(this.logLevel);
     }
 
@@ -83,14 +103,33 @@ export class SimpleLogger implements Logger {
         this.log(LogLevel.fatal, message, args);
     }
 
-    log(level: LogLevel, message: any, args: any[]) {
+    private log(level: LogLevel, message: any, args: any[]) {
         if (this.shouldLog(level)) {
+            const timestamp = new Date().toISOString();
+
             if (this.useJson) {
-                console.log(JSON.stringify({ level, message, args }));
+                const logEntry: any = {
+                    timestamp,
+                    level,
+                };
+
+                if (message instanceof Error) {
+                    logEntry.message = message.message;
+                    logEntry.stack = message.stack;
+                    logEntry.name = message.name;
+                } else {
+                    logEntry.message = message;
+                }
+
+                if (args && args.length > 0) {
+                    logEntry.args = args.map((arg) => extractErrorDetails(arg));
+                }
+
+                console.log(JSON.stringify(logEntry));
             } else {
                 const formattedMessage = formatMessage(message, args);
                 console.log(
-                    `${level.toString().toUpperCase()}: ${formattedMessage}`,
+                    `${timestamp} [${level.toUpperCase()}]: ${formattedMessage}`,
                 );
             }
         }
